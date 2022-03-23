@@ -1,0 +1,25 @@
+.rl-dropdown {
+    list-style-type: none;
+}
+
+.rl-dropdown li {
+    list-style-type: none;
+}
+
+.rl-dropdown.open {
+    display: block;
+}
+
+.rl-dropdown.open li {
+    color: blue;
+    font-weight: bold;
+}
+
+.rl-dropdown.closed {
+    display: none;
+}
+
+.rl-dropdown.closed li {
+    color: rebeccapurple;
+}
+
