@@ -12,12 +12,17 @@
 /.next/
 /out/
 
+# firebase
+.firebaserc
+
 # production
 /build
 
 # misc
 .DS_Store
 *.pem
+.idea
+.github
 
 # debug
 npm-debug.log*
