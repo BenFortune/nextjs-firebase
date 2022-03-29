@@ -1,7 +1,6 @@
 import React from 'react';
 import {fireEvent, render, waitFor, within} from '@testing-library/react';
 import SignIn from '../../pages/sign-in';
-import {Auth} from '../../__mocks__/aws-amplify';
 import firebase from '../../firebase';
 import Chance from 'chance';
 
@@ -67,13 +66,6 @@ describe('Integration : Sign In', () => {
       fireEvent.change(passwordInput, {target: {value: givenPassword}});
       fireEvent.click(signInButton);
 
-      // await waitFor(() => {
-      //   expect(Auth.signIn).toHaveBeenCalledTimes(1);
-      //     givenEmail,
-      //     givenPassword
-      //   );
-      // });
-      //
       await waitFor(() => {
         expect(authSpy).toHaveBeenCalledTimes(1);
         expect(authSpy).toHaveBeenLastCalledWith(
