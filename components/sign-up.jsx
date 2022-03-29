@@ -1,4 +1,4 @@
-import {Auth} from 'aws-amplify';
+import firebase from 'firebase';
 import {useState} from 'react';
 
 export default function SignUp() {
@@ -14,14 +14,10 @@ export default function SignUp() {
     const req = {
       username: email.value,
       password: password.value,
-      attributes: {
-        email: email.value,
-        name: name.value
-      }
     };
 
     try {
-      await Auth.signUp(req);
+      await firebase.auth().createUserWithEmailAndPassword(req);
       updateAlertMessage({display: true, alertType: 'success'});
     } catch (error) {
       updateAlertMessage({display: true, alertType: 'failure'});

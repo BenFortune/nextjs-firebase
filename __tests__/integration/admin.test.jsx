@@ -1,5 +1,5 @@
-import {fireEvent, render, waitFor, act} from '@testing-library/react';
-import {Auth} from '../../__mocks__/aws-amplify';
+import {fireEvent, render, waitFor} from '@testing-library/react';
+import firebase from '../../firebase';
 import Admin from '../../pages/admin';
 import Chance from 'chance';
 
@@ -25,80 +25,97 @@ describe('Integration : Admin', () => {
   });
 
   describe('Sign Up', () => {
-    afterEach(() => {
-      Auth.signUp.mockClear();
-    });
+    let authSpy;
 
-    it('should sign up new user successfully', async () => {
-      const {getByRole, queryByText, getByLabelText} = render(<Admin/>);
-
-      expect(queryByText('User created successfully')).toBeNull();
-
-      const givenEmail = chance.email();
-      const givenPassword = chance.string();
-      const givenName = chance.name();
-
-      const nameInput = getByLabelText('Name');
-      const emailInput = getByLabelText('Email');
-      const password = getByLabelText('Password');
-      const signUpButton = getByRole('button', {
-        name: 'Sign Up'
-      });
-
-      fireEvent.change(nameInput, {target: {value: givenName}});
-      fireEvent.change(emailInput, {target: {value: givenEmail}});
-      fireEvent.change(password, {target: {value: givenPassword}});
-      fireEvent.click(signUpButton);
-
-      await waitFor(() => {
-        expect(Auth.signUp).toHaveBeenCalledTimes(1);
-        expect(Auth.signUp).toHaveBeenLastCalledWith({
-          username: givenEmail,
-          password: givenPassword,
-          attributes: {
-            email: givenEmail,
-            name: givenName
+    describe('when sign up is successful', () => {
+      beforeEach(() => {
+        authSpy = jest.spyOn(firebase.auth(), 'createUserWithEmailAndPassword').mockResolvedValue({
+          user: {
+            uid: chance.guid()
           }
         });
       });
 
-      expect(queryByText('User created successfully')).toBeInTheDocument();
-    });
-
-    it('should not sign up the new user', async () => {
-      const {getByRole, queryByText, getByLabelText} = render(<Admin/>);
-
-      expect(queryByText('Failed to create user')).toBeNull();
-
-      const givenEmail = 'ben@ben.com';
-      const givenPassword = chance.string();
-      const givenName = chance.name();
-
-      const nameInput = getByLabelText('Name');
-      const emailInput = getByLabelText('Email');
-      const password = getByLabelText('Password');
-      const signUpButton = getByRole('button', {
-        name: 'Sign Up'
+      afterEach(() => {
+        firebase.auth().createUserWithEmailAndPassword.mockClear();
       });
 
-      fireEvent.change(nameInput, {target: {value: givenName}});
-      fireEvent.change(emailInput, {target: {value: givenEmail}});
-      fireEvent.change(password, {target: {value: givenPassword}});
-      fireEvent.click(signUpButton);
+      it('should sign up new user successfully', async () => {
+        const {getByRole, queryByText, getByLabelText} = render(<Admin/>);
 
-      await waitFor(() => {
-        expect(Auth.signUp).toHaveBeenCalledTimes(1);
-        expect(Auth.signUp).toHaveBeenLastCalledWith({
-          username: givenEmail,
-          password: givenPassword,
-          attributes: {
-            email: givenEmail,
-            name: givenName
-          }
+        expect(queryByText('User created successfully')).toBeNull();
+
+        const givenEmail = chance.email();
+        const givenPassword = chance.string();
+        const givenName = chance.name();
+
+        const nameInput = getByLabelText('Name');
+        const emailInput = getByLabelText('Email');
+        const password = getByLabelText('Password');
+        const signUpButton = getByRole('button', {
+          name: 'Sign Up'
+        });
+
+        fireEvent.change(nameInput, {target: {value: givenName}});
+        fireEvent.change(emailInput, {target: {value: givenEmail}});
+        fireEvent.change(password, {target: {value: givenPassword}});
+        fireEvent.click(signUpButton);
+
+        await waitFor(() => {
+          expect(authSpy).toHaveBeenCalledTimes(1);
+          expect(authSpy).toHaveBeenLastCalledWith({
+            username: givenEmail,
+            password: givenPassword,
+          });
+        });
+
+        expect(queryByText('User created successfully')).toBeInTheDocument();
+      });
+    });
+
+    describe('when sign up is not successful', () => {
+      beforeEach(() => {
+        authSpy = jest.spyOn(firebase.auth(), 'createUserWithEmailAndPassword').mockRejectedValue({
+          message: 'Error Signing In',
+          statusCode: 500
         });
       });
 
-      expect(queryByText('Failed to create user')).toBeInTheDocument();
+      afterEach(() => {
+        firebase.auth().createUserWithEmailAndPassword.mockClear();
+      });
+
+      it('should not sign up the new user', async () => {
+        const {getByRole, queryByText, getByLabelText} = render(<Admin/>);
+
+        expect(queryByText('Failed to create user')).toBeNull();
+
+        const givenEmail = 'ben@ben.com';
+        const givenPassword = chance.string();
+        const givenName = chance.name();
+
+        const nameInput = getByLabelText('Name');
+        const emailInput = getByLabelText('Email');
+        const password = getByLabelText('Password');
+        const signUpButton = getByRole('button', {
+          name: 'Sign Up'
+        });
+
+        fireEvent.change(nameInput, {target: {value: givenName}});
+        fireEvent.change(emailInput, {target: {value: givenEmail}});
+        fireEvent.change(password, {target: {value: givenPassword}});
+        fireEvent.click(signUpButton);
+
+        await waitFor(() => {
+          expect(authSpy).toHaveBeenCalledTimes(1);
+          expect(authSpy).toHaveBeenLastCalledWith({
+            username: givenEmail,
+            password: givenPassword,
+          });
+        });
+
+        expect(queryByText('Failed to create user')).toBeInTheDocument();
+      });
     });
   });
 });
