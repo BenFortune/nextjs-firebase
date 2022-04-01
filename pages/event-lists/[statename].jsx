@@ -1,48 +1,24 @@
 import Head from 'next/head';
-import {API} from 'aws-amplify';
-import {stateNameList, stateNameToAbbreviation} from '../../constants/state-names';
+import firebase from '../../firebase';
 import Header from '../../components/header';
 import Footer from '../../components/footer';
 import EventList from '../../components/event-list';
 
-export async function getStaticPaths() {
-  const paths = stateNameList.map((stateName) => ({
-    params: { statename: stateName.fullName },
-  }));
+export async function getServerSideProps(context) {
+  const stateName = context.params.statename;
+  const eventList = [];
 
-  return { paths, fallback: false };
-}
+  await firebase.database().ref(`/${stateName}`).on('value', (snapshot) => {
+    const dataSnapshot = snapshot.val();
 
-export async function getStaticProps({ params }) {
-  let eventList = [], showErrorMessage = false;
-  const stateName = params.statename;
-  const stateNameAbbreviation = stateNameToAbbreviation[stateName];
+    Object.entries(dataSnapshot).forEach((entry) => {
+      const [key, value] = entry;
 
-  try {
-    const events = await API.graphql({
-      query: 'listEvents',
-      variables: {
-        filter: {
-          state: {
-            eq: stateNameAbbreviation
-          }
-        }
-      }
+      eventList.push(value);
     });
+  });
 
-    eventList = events.data.listEvents.items;
-  } catch {
-    showErrorMessage = true;
-  }
-
-  return {
-    props: {
-      stateName,
-      eventList,
-      showErrorMessage
-    },
-    revalidate: 10
-  };
+  return { props: { stateName, eventList } };
 }
 
 export default function EventLists({stateName, eventList, showErrorMessage}) {
