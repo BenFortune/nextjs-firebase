@@ -1,41 +1,32 @@
 import Head from 'next/head';
-import {API, Storage} from 'aws-amplify';
+import firebase from '../../firebase';
 import Header from '../../components/header';
 import Footer from '../../components/footer';
-import {stateNameList, stateNameToAbbreviation} from '../../constants/state-names';
 import FlierList from '../../components/flier-list';
 
-export async function getStaticPaths() {
-  const paths = stateNameList.map((stateName) => ({
-    params: { statename: stateName.fullName },
-  }));
-
-  return { paths, fallback: false };
-}
-
-export async function getStaticProps({params}) {
+export async function getServerSideProps({params}) {
   let flierList = [];
+  let eventList = [];
   let error = false;
   const stateName = params.statename;
-  const stateNameAbbreviation = stateNameToAbbreviation[stateName];
+  const storageRef = firebase.storage().ref();
 
   try {
-    const events = await API.graphql({
-      query: 'listEvents',
-      variables: {
-        filter: {
-          state: {
-            eq: stateNameAbbreviation
-          }
-        }
-      }
+    await firebase.database().ref(`/${stateName}`).on('value', (snapshot) => {
+      const dataSnapshot = snapshot.val();
+
+      Object.entries(dataSnapshot).forEach((entry) => {
+        const [key, value] = entry;
+
+        eventList.push(value);
+      });
     });
 
-    flierList = Promise.all(events.data.listEvents.items.map(async (event) => {
-      if (!event.image) {
+    flierList = await Promise.all(eventList.map(async (event) => {
+      if (!event.imageSrc) {
         return event;
       }
-      event.imageSrc = await Storage.get(event.image).catch(() => (error = true));
+      event.imageSrc = await storageRef.child(event.imageSrc).getDownloadURL();
 
       return event;
     }));

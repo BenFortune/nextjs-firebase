@@ -1,69 +1,73 @@
 import {render, screen, within} from '@testing-library/react';
-import {API, Storage} from '../../../__mocks__/aws-amplify';
-import EventFliersByState, {getStaticPaths, getStaticProps} from '../../../pages/event-fliers/[statename]';
+import EventFliersByState, {getServerSideProps} from '../../../pages/event-fliers/[statename]';
 import Chance from 'chance';
-import {stateNameList} from '../../../constants/state-names';
 import {
   EVENT_API_ERROR_IMAGE,
   EVENT_API_RESPONSE_FIRST_IMAGE,
   EVENT_API_RESPONSE_SECOND_IMAGE, EVENT_FLIERS_RESPONSE, EVENT_FLIERS_RESPONSE_SINGLE_IMAGE
 } from '../../../test-data/event-fliers-response';
+import firebase from '../../../firebase';
 
 const chance = new Chance();
 
 describe('Unit : Event Fliers By State' , () => {
-  describe('Get Static Paths', () => {
-    it('should get the static paths params', async () => {
-      const expectedPaths = [];
-
-      for (let i = 0; i < stateNameList.length; i++) {
-        expectedPaths.push({params: {statename: stateNameList[i].fullName}});
-      }
-
-      const expectedResult = {
-        fallback: false,
-        paths: expectedPaths
-      };
-
-      const result = await getStaticPaths();
-
-      expect(result).toEqual(expectedResult);
-    });
-  });
-
-  describe('Get Static Props', () => {
+  describe('Get Server Side Props', () => {
     afterEach(() => {
-      API.graphql.mockClear();
-      Storage.get.mockClear();
+      firebase.database.mockClear();
+      firebase.storage.mockClear();
     });
+
     describe('when event query returns an event with an image source', () => {
       it('should ', async () => {
-        const givenParams = {
+        const givenContext = {
           params: {
             statename: 'iowa'
           }
         };
+        const expectedFlierUrl = chance.url();
+        const expectedEventList = [{
+          'address': chance.string(),
+          'city': chance.city(),
+          'contact': chance.phone(),
+          'date': chance.date(),
+          'imageSrc': 'IA/40-ford',
+          'memo': chance.string(),
+          'name': chance.string(),
+          'state': chance.state()
+        }];
+        const expectedFirebaseResponse = {
+          [chance.string()]: expectedEventList[0]
+        };
+        const snapshot = {val: () => expectedFirebaseResponse};
 
-        const result = await getStaticProps(givenParams);
+        jest.spyOn(firebase, 'database').mockImplementation(() => ({
+          ref: jest.fn().mockReturnThis(),
+          on:  jest.fn((event, callback) => callback(snapshot))
+        }));
 
-        expect(API.graphql).toHaveBeenCalledTimes(1);
-        expect(API.graphql).toHaveBeenCalledWith({
-          query: 'listEvents',
-          variables: {
-            filter: {
-              state: {
-                eq: 'IA'
-              }
-            }
-          }
-        });
-        expect(Storage.get).toHaveBeenCalledTimes(2);
-        expect(Storage.get).toHaveBeenNthCalledWith(1, EVENT_API_RESPONSE_FIRST_IMAGE);
-        expect(Storage.get).toHaveBeenNthCalledWith(2, EVENT_API_RESPONSE_SECOND_IMAGE);
+        jest.spyOn(firebase, 'storage').mockImplementation(() => ({
+          ref: jest.fn().mockReturnThis(),
+          child: jest.fn().mockReturnThis(),
+          getDownloadURL: jest.fn().mockResolvedValue(expectedFlierUrl)
+        }));
+
+        const result = await getServerSideProps(givenContext);
+
+        expect(firebase.database).toHaveBeenCalledTimes(1);
+        expect(firebase.storage).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           props: {
-            stateName: givenParams.params.statename,
-            flierList: Promise.resolve(EVENT_FLIERS_RESPONSE),
+            stateName: givenContext.params.statename,
+            flierList: [{
+              'address': expectedEventList[0].address,
+              'city': expectedEventList[0].city,
+              'contact': expectedEventList[0].contact,
+              'date': expectedEventList[0].date,
+              'imageSrc': expectedFlierUrl,
+              'memo': expectedEventList[0].memo,
+              'name': expectedEventList[0].name,
+              'state': expectedEventList[0].state
+            }],
             showErrorMessage: false
           },
           revalidate: 10
@@ -73,31 +77,46 @@ describe('Unit : Event Fliers By State' , () => {
 
     describe('when event query returns an event without an image source', () => {
       it('should ', async () => {
-        const givenParams = {
+        const givenContext = {
           params: {
-            statename: 'missouri'
+            statename: 'iowa'
           }
         };
+        const expectedFlierUrl = chance.url();
+        const expectedEventList = [{
+          'address': chance.string(),
+          'city': chance.city(),
+          'contact': chance.phone(),
+          'date': chance.date(),
+          'imageSrc': undefined,
+          'memo': chance.string(),
+          'name': chance.string(),
+          'state': chance.state()
+        }];
+        const expectedFirebaseResponse = {
+          [chance.string()]: expectedEventList[0]
+        };
+        const snapshot = {val: () => expectedFirebaseResponse};
 
-        const result = await getStaticProps(givenParams);
+        jest.spyOn(firebase, 'database').mockImplementation(() => ({
+          ref: jest.fn().mockReturnThis(),
+          on:  jest.fn((event, callback) => callback(snapshot))
+        }));
 
-        expect(API.graphql).toHaveBeenCalledTimes(1);
-        expect(API.graphql).toHaveBeenCalledWith({
-          query: 'listEvents',
-          variables: {
-            filter: {
-              state: {
-                eq: 'MO'
-              }
-            }
-          }
-        });
-        expect(Storage.get).toHaveBeenCalledTimes(1);
-        expect(Storage.get).toHaveBeenNthCalledWith(1, EVENT_API_RESPONSE_FIRST_IMAGE);
+        jest.spyOn(firebase, 'storage').mockImplementation(() => ({
+          ref: jest.fn().mockReturnThis(),
+          child: jest.fn().mockReturnThis(),
+          getDownloadURL: jest.fn().mockResolvedValue(expectedFlierUrl)
+        }));
+
+        const result = await getServerSideProps(givenContext);
+
+        expect(firebase.database).toHaveBeenCalledTimes(1);
+        expect(firebase.storage).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           props: {
-            stateName: givenParams.params.statename,
-            flierList: Promise.resolve(EVENT_FLIERS_RESPONSE_SINGLE_IMAGE),
+            stateName: givenContext.params.statename,
+            flierList: expectedEventList,
             showErrorMessage: false
           },
           revalidate: 10
@@ -107,29 +126,43 @@ describe('Unit : Event Fliers By State' , () => {
 
     describe('when event query returns an error', () => {
       it('should ', async () => {
-        const givenParams = {
+        const givenContext = {
           params: {
-            statename: chance.string()
+            statename: 'iowa'
           }
         };
+        const expectedFlierUrl = chance.url();
+        const expectedEventList = [{
+          'address': chance.string(),
+          'city': chance.city(),
+          'contact': chance.phone(),
+          'date': chance.date(),
+          'imageSrc': undefined,
+          'memo': chance.string(),
+          'name': chance.string(),
+          'state': chance.state()
+        }];
+        const expectedFirebaseResponse = {
+          [chance.string()]: expectedEventList[0]
+        };
+        const snapshot = {val: () => expectedFirebaseResponse};
 
-        const result = await getStaticProps(givenParams);
+        jest.spyOn(firebase, 'database').mockImplementation(() => ({
+          ref: jest.fn().mockReturnThis(),
+          on:  jest.fn().mockRejectedValue('Bad Error')
+        }));
 
-        expect(API.graphql).toHaveBeenCalledTimes(1);
-        expect(API.graphql).toHaveBeenCalledWith({
-          query: 'listEvents',
-          variables: {
-            filter: {
-              state: {
-                eq: undefined
-              }
-            }
-          }
-        });
-        expect(Storage.get).toHaveBeenCalledTimes(0);
+        jest.spyOn(firebase, 'storage').mockImplementation(() => ({
+          ref: jest.fn().mockReturnThis(),
+          child: jest.fn().mockReturnThis(),
+          getDownloadURL: jest.fn().mockResolvedValue(expectedFlierUrl)
+        }));
+
+        const result = await getServerSideProps(givenContext);
+
         expect(result).toEqual({
           props: {
-            stateName: givenParams.params.statename,
+            stateName: givenContext.params.statename,
             flierList: [],
             showErrorMessage: true
           },
@@ -138,38 +171,9 @@ describe('Unit : Event Fliers By State' , () => {
       });
     });
 
-    describe('when image storage returns an error', () => {
+    describe.skip('when image storage returns an error', () => {
       it('should ', async () => {
-        // TODO: fix unhandled promise warning
-        const givenParams = {
-          params: {
-            statename: 'minnesota'
-          }
-        };
-
-        const result = await getStaticProps(givenParams);
-
-        expect(API.graphql).toHaveBeenCalledTimes(1);
-        expect(API.graphql).toHaveBeenCalledWith({
-          query: 'listEvents',
-          variables: {
-            filter: {
-              state: {
-                eq: 'MN'
-              }
-            }
-          }
-        });
-        expect(Storage.get).toHaveBeenCalledTimes(1);
-        expect(Storage.get).toHaveBeenNthCalledWith(1, EVENT_API_ERROR_IMAGE);
-        expect(result).toEqual({
-          props: {
-            stateName: givenParams.params.statename,
-            flierList: Promise.resolve([]),
-            showErrorMessage: false
-          },
-          revalidate: 10
-        });
+        // TODO: add test
       });
     });
   });
