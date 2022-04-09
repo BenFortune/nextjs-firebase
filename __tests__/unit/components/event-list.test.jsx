@@ -5,7 +5,6 @@ import Chance from 'chance';
 const chance = new Chance();
 function buildEventList() {
   return {
-    id: chance.guid(),
     date: chance.date({string: true}),
     month: chance.month(),
     name: chance.string(),
@@ -15,9 +14,7 @@ function buildEventList() {
     state: chance.string(),
     contact: chance.phone(),
     memo: chance.string(),
-    image: chance.string(),
-    createdAt: chance.string(),
-    updatedAt: chance.string()
+    imageSrc: chance.string()
   };
 }
 

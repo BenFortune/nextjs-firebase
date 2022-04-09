@@ -17,7 +17,8 @@ export default function EventList({eventList}) {
           </thead>
           <tbody aria-label="event-list-table-body" key="event-list-table-body">
             {eventList.map((event) => (
-              <tr key={event.id}>
+              <tr key={event.name}>
+                <td>{event.date}</td>
                 <td>{event.name}</td>
                 <td>{event.time}</td>
                 <td>{event.address}</td>

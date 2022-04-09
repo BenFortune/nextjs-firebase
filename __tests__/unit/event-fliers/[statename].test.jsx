@@ -1,11 +1,6 @@
 import {render, screen, within} from '@testing-library/react';
 import EventFliersByState, {getServerSideProps} from '../../../pages/event-fliers/[statename]';
 import Chance from 'chance';
-import {
-  EVENT_API_ERROR_IMAGE,
-  EVENT_API_RESPONSE_FIRST_IMAGE,
-  EVENT_API_RESPONSE_SECOND_IMAGE, EVENT_FLIERS_RESPONSE, EVENT_FLIERS_RESPONSE_SINGLE_IMAGE
-} from '../../../test-data/event-fliers-response';
 import firebase from '../../../firebase';
 
 const chance = new Chance();
