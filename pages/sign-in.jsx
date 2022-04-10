@@ -17,8 +17,10 @@ export default function SignIn() {
 
       console.log('Ben - Sign in success', user);
 
-      router.push('/');
+      // router.push('/');
     } catch (e) {
+      console.log('Ben - sign in error', e);
+
       showSignInError(true);
     }
   }
