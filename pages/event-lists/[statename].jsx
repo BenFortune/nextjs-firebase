@@ -7,16 +7,29 @@ import EventList from '../../components/event-list';
 export async function getServerSideProps(context) {
   const stateName = context.params.statename;
   const eventList = [];
+  const dbRef = firebase.database().ref(`/${stateName}`);
+  const getEventData = (ref) => {
+    return new Promise((resolve, reject) => {
+      const onError = (error) => reject(error);
+      const onSuccess = (snapshot) => resolve(snapshot.val());
 
-  await firebase.database().ref(`/${stateName}`).on('value', (snapshot) => {
-    const dataSnapshot = snapshot.val();
-
-    Object.entries(dataSnapshot).forEach((entry) => {
-      const [key, value] = entry;
-
-      eventList.push(value);
+      ref.on('value', onSuccess, onError);
     });
-  });
+  };
+
+  await getEventData(dbRef)
+    .then((value) => {
+      Object.entries(value).forEach((entry) => {
+        const [key, value] = entry;
+
+        eventList.push(value);
+      });
+    })
+    .catch((error) => {
+      console.log('Ben - error in db call', error);
+      // Error handle here
+    });
+
 
   return { props: { stateName, eventList } };
 }
@@ -32,6 +45,7 @@ export default function EventLists({stateName, eventList, showErrorMessage}) {
       <Header/>
       <main>
         <h1>Ricks List {stateName} Event List</h1>
+        <p>{eventList.length} Events to Show</p>
         {showErrorMessage
           ? <div>There was an error retrieving these events. Please try again later.</div>
           : <EventList eventList={eventList} />
