@@ -15,7 +15,9 @@ export default function SignIn() {
     try {
       const user = await firebase.auth().signInWithEmailAndPassword(email.value, password.value);
 
-      // router.push('/');
+      console.log('Ben - Sign in success', user);
+
+      router.push('/');
     } catch (e) {
       showSignInError(true);
     }
