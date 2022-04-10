@@ -12,17 +12,28 @@ export default function SignIn() {
 
     const {email, password} = event.target.elements;
 
-    try {
-      const user = await firebase.auth().signInWithEmailAndPassword(email.value, password.value);
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
+      .then(async () => {
+        // Existing and future Auth states are now persisted in the current
+        // session only. Closing the window would clear any existing state even
+        // if a user forgets to sign out.
+        // ...
+        // New sign-in will be persisted with session persistence.
+        console.log('Ben - auth set persistence success');
+        // return firebase.auth().signInWithEmailAndPassword(username.value, password.value);
 
-      console.log('Ben - Sign in success', user);
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email.value, password.value);
 
-      // router.push('/');
-    } catch (e) {
-      console.log('Ben - sign in error', e);
+        console.log('Ben success signing in', userCredential.user);
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        console.log('Ben - auth set persistence error', error);
+        let errorCode = error.code;
+        let errorMessage = error.message;
 
-      showSignInError(true);
-    }
+        showSignInError(true);
+      });
   }
 
   return (
