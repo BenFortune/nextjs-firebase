@@ -7,7 +7,7 @@ import Chance from 'chance';
 const chance = new Chance();
 
 describe('Integration : Sign In', () => {
-  let authSpy;
+  let authSpy, persistenceSpy;
 
   it('should render a header with navigation', () => {
     const {getByRole} = render(<SignIn/>);
@@ -31,6 +31,9 @@ describe('Integration : Sign In', () => {
 
   describe('when auth is successful', () => {
     beforeEach(() => {
+      persistenceSpy = jest.spyOn(firebase.auth(), 'setPersistence').mockResolvedValue(() => {
+        return jest.fn();
+      });
       authSpy = jest.spyOn(firebase.auth(), 'signInWithEmailAndPassword').mockResolvedValue({
         name: 'ben',
         title: 'sup'

@@ -1,9 +1,5 @@
 /* istanbul ignore file */
 // TODO: renable instabul when this component is used
-
-
-import {Auth} from 'aws-amplify';
-
 export default function SignInComponent() {
   // async function forgotPassword() {
   //   const username = 'coolUsername';

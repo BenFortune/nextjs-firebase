@@ -5,7 +5,6 @@ import Chance from 'chance';
 const chance = new Chance();
 function buildEventList() {
   return {
-    id: chance.guid(),
     date: chance.date({string: true}),
     month: chance.month(),
     name: chance.string(),
@@ -79,13 +78,14 @@ describe('Integration : State Event List', () => {
       tableBodyRows.forEach((tableRow, index) => {
         const {getAllByRole} = within(tableRow);
         const tableCells = getAllByRole('cell');
-        expect(tableCells[0].textContent).toEqual(givenProps.eventList[index].name);
-        expect(tableCells[1].textContent).toEqual(givenProps.eventList[index].time);
-        expect(tableCells[2].textContent).toEqual(givenProps.eventList[index].address);
-        expect(tableCells[3].textContent).toEqual(givenProps.eventList[index].city);
-        expect(tableCells[4].textContent).toEqual(givenProps.eventList[index].state);
-        expect(tableCells[5].textContent).toEqual(givenProps.eventList[index].contact);
-        expect(tableCells[6].textContent).toEqual(givenProps.eventList[index].memo);
+        expect(tableCells[0].textContent).toEqual(givenProps.eventList[index].date);
+        expect(tableCells[1].textContent).toEqual(givenProps.eventList[index].name);
+        expect(tableCells[2].textContent).toEqual(givenProps.eventList[index].time);
+        expect(tableCells[3].textContent).toEqual(givenProps.eventList[index].address);
+        expect(tableCells[4].textContent).toEqual(givenProps.eventList[index].city);
+        expect(tableCells[5].textContent).toEqual(givenProps.eventList[index].state);
+        expect(tableCells[6].textContent).toEqual(givenProps.eventList[index].contact);
+        expect(tableCells[7].textContent).toEqual(givenProps.eventList[index].memo);
       });
     });
   });
