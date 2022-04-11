@@ -14,9 +14,7 @@ function buildEventList() {
     state: chance.string(),
     contact: chance.phone(),
     memo: chance.string(),
-    image: chance.string(),
-    createdAt: chance.string(),
-    updatedAt: chance.string()
+    imageSrc: chance.string()
   };
 }
 

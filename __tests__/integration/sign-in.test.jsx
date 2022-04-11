@@ -35,8 +35,11 @@ describe('Integration : Sign In', () => {
         return jest.fn();
       });
       authSpy = jest.spyOn(firebase.auth(), 'signInWithEmailAndPassword').mockResolvedValue({
-        name: 'ben',
-        title: 'sup'
+        user:
+          {
+            name: 'ben',
+            title: 'sup'
+          }
       });
     });
 
