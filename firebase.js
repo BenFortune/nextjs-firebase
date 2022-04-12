@@ -19,7 +19,7 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-if(typeof window !== undefined){
+if(typeof window !== 'undefined' && !firebase.apps.length){
   firebase.analytics();
 }
 
