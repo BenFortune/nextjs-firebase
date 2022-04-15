@@ -6,7 +6,7 @@ import firebase from 'firebase';
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY_NODE_ENV === 'production') {
+    if (process.env.NEXT_PUBLIC_NODE_ENV === 'production') {
       firebase.analytics();
     }
   }, []);
