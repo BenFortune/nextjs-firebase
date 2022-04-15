@@ -15,10 +15,10 @@ const firebaseConfig = {
   appId: process.env.FIREBASE_APP_ID,
 };
 
-const analytics = firebase.analytics;
-
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
+
+const analytics = firebase.analytics;
 
 export {firebase, analytics};
