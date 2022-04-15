@@ -1,7 +1,7 @@
 import React from 'react';
 import {fireEvent, render, waitFor, within} from '@testing-library/react';
 import SignIn from '../../pages/sign-in';
-import firebase from '../../firebase';
+import {firebase} from '../../firebase';
 import Chance from 'chance';
 
 const chance = new Chance();

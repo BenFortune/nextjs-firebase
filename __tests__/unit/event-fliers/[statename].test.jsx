@@ -1,7 +1,7 @@
 import {render, screen, within} from '@testing-library/react';
 import EventFliersByState, {getServerSideProps} from '../../../pages/event-fliers/[statename]';
 import Chance from 'chance';
-import firebase from '../../../firebase';
+import {firebase} from '../../../firebase';
 
 const chance = new Chance();
 

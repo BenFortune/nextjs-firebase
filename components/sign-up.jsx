@@ -1,4 +1,4 @@
-import firebase from 'firebase';
+import {firebase} from '../firebase';
 import {useState} from 'react';
 
 export default function SignUp() {

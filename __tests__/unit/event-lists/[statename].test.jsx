@@ -1,6 +1,6 @@
 import {render} from '@testing-library/react';
 import EventListByState, {getServerSideProps}  from '../../../pages/event-lists/[statename]';
-import firebase from '../../../firebase';
+import {firebase} from '../../../firebase';
 import Chance from 'chance';
 
 const chance = new Chance();

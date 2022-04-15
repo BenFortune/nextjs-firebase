@@ -2,12 +2,12 @@
 
 import '../styles/globals.css';
 import {useEffect} from 'react';
-import firebase from 'firebase';
+import {analytics} from '../firebase';
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_NODE_ENV === 'production') {
-      firebase.analytics();
+      analytics();
     }
   }, []);
 

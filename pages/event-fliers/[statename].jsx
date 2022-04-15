@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import firebase from '../../firebase';
+import {firebase} from '../../firebase';
 import Header from '../../components/header';
 import Footer from '../../components/footer';
 import FlierList from '../../components/flier-list';

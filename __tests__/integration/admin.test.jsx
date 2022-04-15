@@ -1,5 +1,5 @@
 import {fireEvent, render, waitFor} from '@testing-library/react';
-import firebase from '../../firebase';
+import {firebase} from '../../firebase';
 import Admin from '../../pages/admin';
 import Chance from 'chance';
 

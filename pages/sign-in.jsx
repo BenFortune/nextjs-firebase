@@ -2,7 +2,7 @@ import {useState} from 'react';
 import Head from 'next/head';
 import Header from '../components/header';
 import Footer from '../components/footer';
-import firebase from '../firebase';
+import {firebase} from '../firebase';
 
 export default function SignIn() {
   const [isSignInError, showSignInError] = useState(false);
