@@ -11,7 +11,7 @@ describe('Unit : Header', () => {
     expect(header).toBeInTheDocument();
   });
 
-  it('render the Rick\s List logo', () => {
+  it('render the Rick\'s List logo', () => {
     render(<Header />);
 
     const ricksListLogo = screen.getByRole('img');
