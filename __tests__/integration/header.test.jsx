@@ -8,6 +8,7 @@ describe('Integration : Header', () => {
   it('something cool', async () => {
     render(<Header />);
 
+    expect(screen.getByAltText('Rick\'s List Header Logo')).toBeInTheDocument();
     const list = screen.getByRole('list', {
       name: /ricks-lists-states-fliers/i,
     });

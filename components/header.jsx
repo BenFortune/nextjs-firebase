@@ -1,10 +1,10 @@
+import Image from 'next/image';
 import Navigation from './navigation';
 
 export default function Header() {
   return (
     <header>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/RicksListLogo.png" alt="Rick's List Logo" height="25%" width="25%"/>
+      <Image src="/RicksListLogo.png" width={1676} height={870} layout="responsive" alt="Rick's List Header Logo"/>
       <Navigation/>
     </header>
   );
