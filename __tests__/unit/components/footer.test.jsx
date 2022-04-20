@@ -22,7 +22,7 @@ describe('Unit : Footer', () => {
     const {getByRole} = within(footerLink);
     const footerLogo = getByRole('img');
 
-    expect(footerLogo).toHaveAttribute('src', '/RicksListLogoFooter.png');
-    expect(footerLogo).toHaveAttribute('alt', 'Ricks List Homepage');
+    expect(footerLogo).toHaveAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+    expect(footerLogo).toHaveAttribute('alt', 'Rick\'s List Footer Logo');
   });
 });

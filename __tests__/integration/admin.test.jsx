@@ -6,20 +6,21 @@ import Chance from 'chance';
 const chance = new Chance();
 
 describe('Integration : Admin', () => {
-  describe('Upload Form', () => {
-    it('should upload an event', () => {
-
-    });
-    it('should not upload an event', () => {
-
-    });
-  });
   describe('Header', () => {
     it('should render a header', () => {
 
     });
 
     it('should render navigation', () => {
+
+    });
+  });
+
+  describe('Upload Form', () => {
+    it('should upload an event', () => {
+
+    });
+    it('should not upload an event', () => {
 
     });
   });
