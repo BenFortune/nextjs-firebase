@@ -14,7 +14,6 @@ export default function SignIn() {
 
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
       .then(async () => {
-        console.log('Ben - auth set persistence success');
 
         const userCredential = await firebase.auth().signInWithEmailAndPassword(email.value, password.value);
 

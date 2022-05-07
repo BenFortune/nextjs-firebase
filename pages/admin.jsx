@@ -1,10 +1,26 @@
+import {useState, useEffect} from 'react';
 import Head from 'next/head';
+import {useRouter} from 'next/router';
+import {firebase} from '../firebase';
 import Header from '../components/header';
 import Footer from '../components/footer';
 import UploadForm from '../components/upload-form';
 import SignUp from '../components/sign-up';
 
 export default function Admin() {
+  const [isAuthenticated, updatedAuthenticatedState] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        router.push('/sign-in');
+      } else {
+        updatedAuthenticatedState(true);
+      }
+    });
+  }, []);
+
   return(
     <>
       <Head>
@@ -15,8 +31,13 @@ export default function Admin() {
       <Header/>
       <main>
         <h1>Ricks List Admin</h1>
-        <UploadForm/>
-        <SignUp />
+        {isAuthenticated ?
+          <section>
+            <UploadForm/>
+            <SignUp />
+          </section>
+          : undefined // TODO: replace with loader
+        }
       </main>
       <Footer/>
     </>

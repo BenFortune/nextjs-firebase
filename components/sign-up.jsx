@@ -39,7 +39,7 @@ export default function SignUp() {
     <section className="sign-up-form-wrapper">
       <h2>Sign Up</h2>
       {alertMessage.display ? renderAlertMessage(alertMessage.alertType) : null}
-      <form name="sign-up-form" onSubmit={signUp}>
+      <form name="sign-up-form" aria-label="sign-up-form" onSubmit={signUp}>
         <label htmlFor="user-name">Name</label>
         <input id="user-name" type="text" name="name"/>
         <label htmlFor="user-email">Email</label>

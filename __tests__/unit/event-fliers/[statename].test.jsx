@@ -166,11 +166,11 @@ describe('Unit : Event Fliers By State' , () => {
       });
     });
 
-    describe.skip('when image storage returns an error', () => {
-      it('should ', async () => {
-        // TODO: add test
-      });
-    });
+    // describe('when image storage returns an error', () => {
+    //   it('should ', async () => {
+    // TODO: add test
+    //   });
+    // });
   });
 
   describe('Render Flier List Page', () => {

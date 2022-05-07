@@ -15,9 +15,11 @@ describe('Unit : State Name Select', () => {
 
     stateNameOptions.forEach((stateNameOption, index) => {
       const expectedStateNameAbbreviation = stateNameList[index].abbreviation;
+      const expectedStateNameFullName = stateNameList[index].fullName;
 
       expect(stateNameOption.textContent).toEqual(expectedStateNameAbbreviation);
-      expect(stateNameOption).toHaveAttribute('name', expectedStateNameAbbreviation);
+      expect(stateNameOption).toHaveAttribute('name', expectedStateNameFullName);
+      expect(stateNameOption).toHaveAttribute('value', expectedStateNameFullName);
     });
   });
 });
