@@ -3,44 +3,53 @@ import {firebase} from '../firebase';
 import {stateNameToAbbreviation} from '../constants/state-names';
 import StatenameSelect from './statename-select';
 
-export default function UploadForm(event) {
+export default function UploadForm() {
   const [imageFileObj, setImageFileObj] = useState();
   const [alertMessage, updateAlertMessage] = useState({
     display: false,
     alertType: null
   });
 
-  function uploadEvent(event) {
+  // TODO: extract firebase database and storage reference pointers to new files
+  async function uploadEvent(event) {
     event.preventDefault();
 
     const {date, name, time, address, city, state, phone, email, memo} = event.target.elements;
     const eventStateName = stateNameToAbbreviation[state.value];
+    const imageResponse = await uploadImage(imageFileObj);
 
-    firebase.database().ref(`/${eventStateName}`).set({
-      date: date.value,
-      name: name.value,
-      time: time.value,
-      address: address.value,
-      city: city.value,
-      state: state.value,
-      phone: phone.value,
-      email: email.value,
-      image: imageFileObj.name,
-      memo: memo.value
-    }).then((resp) => {
-      console.log('Great success', resp);
-
-      updateAlertMessage({
-        display: true,
-        alertType: 'success'
+    if (imageResponse !== 'error') {
+      firebase.database().ref(`/${eventStateName}`).set({
+        date: date.value,
+        name: name.value,
+        time: time.value,
+        address: address.value,
+        city: city.value,
+        state: state.value,
+        phone: phone.value,
+        email: email.value,
+        image: imageFileObj.name,
+        memo: memo.value
+      }).then(() => {
+        updateAlertMessage({
+          display: true,
+          alertType: 'success'
+        });
+      }).catch(() => {
+        updateAlertMessage({
+          display: true,
+          alertType: 'error'
+        });
       });
-    }).catch((err) => {
-      console.log('Error', err);
+    }
+  }
 
-      updateAlertMessage({
-        display: true,
-        alertType: 'error'
-      });
+  function uploadImage(imageFile) {
+    const childRef = firebase.storage().ref().child(imageFile.name);
+    return childRef.put(imageFile).then((snapshot) => {
+      return `${snapshot.ref.fullPath}`;
+    }).catch(() => {
+      return 'error';
     });
   }
 

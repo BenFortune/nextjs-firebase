@@ -11,18 +11,8 @@ const chance = new Chance();
 describe('Integration : Admin', () => {
   let onAuthStateChangedSpy;
 
-  describe('Header', () => {
-    it('should render a header', () => {
-
-    });
-
-    it('should render navigation', () => {
-
-    });
-  });
-
   describe('when authenticated', () => {
-    let databaseSetSpy, storageUploadSpy, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventImage, givenEventMemo;
+    let databaseSetSpy, storageUploadSpy, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventImageName, givenEventImage, givenEventMemo;
 
     beforeEach(() => {
       givenEventDate = `${chance.date()}`;
@@ -33,7 +23,8 @@ describe('Integration : Admin', () => {
       givenEventState = chance.pickone(stateNameList);
       givenContactPhone = chance.phone();
       givenContactEmail = chance.email();
-      givenEventImage = new File(['hello'], 'hello.png', {type: 'image/png'});
+      givenEventImageName = `${chance.string()}.png`;
+      givenEventImage = new File(['hello'], givenEventImageName, {type: 'image/png'});
       givenEventMemo = chance.word();
 
       onAuthStateChangedSpy = jest.spyOn(firebase.auth(), 'onAuthStateChanged')
@@ -42,6 +33,13 @@ describe('Integration : Admin', () => {
             uid: chance.guid()
           }
         )));
+
+      jest.spyOn(firebase, 'storage')
+        .mockImplementation(() => ({
+          ref: jest.fn().mockReturnThis(),
+          child: jest.fn().mockReturnThis(),
+          put: storageUploadSpy
+        }));
 
       jest.spyOn(firebase, 'database').mockImplementation(() => ({
         ref: jest.fn().mockReturnThis(),
@@ -52,13 +50,19 @@ describe('Integration : Admin', () => {
     afterEach(() => {
       firebase.auth().onAuthStateChanged.mockClear();
       firebase.database.mockClear();
+      firebase.storage.mockClear();
     });
 
-    describe('Upload Form', () => {
+    describe('when image upload is successful', () => {
       it('should upload an event', async () => {
+        storageUploadSpy = jest.fn().mockResolvedValue({
+          ref: {
+            fullPath: givenEventImageName
+          }
+        });
         databaseSetSpy = jest.fn().mockResolvedValue('yo');
 
-        const {getByRole, getByText, queryByText} = render(<Admin/>);
+        const {getByRole, queryByText} = render(<Admin/>);
 
         const form = getByRole('form', {
           name: 'upload-event-form'
@@ -93,6 +97,8 @@ describe('Integration : Admin', () => {
         userEvent.click(submitButton);
 
         await waitFor(() => {
+          expect(storageUploadSpy).toHaveBeenCalledTimes(1);
+          expect(storageUploadSpy).toHaveBeenCalledWith(givenEventImage);
           expect(databaseSetSpy).toHaveBeenCalledTimes(1);
           expect(databaseSetSpy).toHaveBeenCalledWith({
             date: givenEventDate,
@@ -103,18 +109,72 @@ describe('Integration : Admin', () => {
             state: givenEventState.fullName,
             phone: givenContactPhone,
             email: givenContactEmail,
-            image: 'hello.png',
+            image: givenEventImageName,
             memo: givenEventMemo
           });
         });
 
         expect(queryByText('Event added successfully.')).toBeInTheDocument();
       });
+    });
 
+    describe('when image upload is not successful', () => {
       it('should not upload an event', async () => {
+        storageUploadSpy = jest.fn().mockRejectedValue('error ben');
+        databaseSetSpy = jest.fn().mockResolvedValue('yo do not call me');
+
+        const {getByRole} = render(<Admin/>);
+
+        const form = getByRole('form', {
+          name: 'upload-event-form'
+        });
+        const {getByLabelText} = within(form);
+        const eventDate = getByLabelText('Date');
+        const eventName = getByLabelText('Event Name');
+        const eventTime = getByLabelText('Time');
+        const eventAddress = getByLabelText('Address');
+        const eventCity = getByLabelText('City');
+        const eventContactPhone = getByLabelText('Contact Phone');
+        const eventContactEmail = getByLabelText('Contact Email');
+        const eventFlier = getByLabelText('Upload Flier');
+        const eventMemo = getByLabelText('Memo');
+        const submitButton = getByRole('button', {
+          name: 'Upload Event'
+        });
+
+        userEvent.type(eventDate, givenEventDate);
+        userEvent.type(eventName, givenEventName);
+        userEvent.type(eventTime, givenEventTime);
+        userEvent.type(eventAddress, givenEventAddress);
+        userEvent.type(eventCity, givenEventCity);
+        userEvent.selectOptions(
+          getByRole('combobox'),
+          getByRole('option', {name: givenEventState.abbreviation}),
+        );
+        userEvent.type(eventContactPhone, givenContactPhone);
+        userEvent.type(eventContactEmail, givenContactEmail);
+        userEvent.upload(eventFlier, givenEventImage);
+        userEvent.type(eventMemo, givenEventMemo);
+        userEvent.click(submitButton);
+
+        await waitFor(() => {
+          expect(storageUploadSpy).toHaveBeenCalledTimes(1);
+          expect(storageUploadSpy).toHaveBeenCalledWith(givenEventImage);
+          expect(databaseSetSpy).toHaveBeenCalledTimes(0);
+        });
+      });
+    });
+
+    describe('when database set is not successful', () => {
+      it('should throw an error', async () => {
+        storageUploadSpy = jest.fn().mockResolvedValue({
+          ref: {
+            fullPath: givenEventImageName
+          }
+        });
         databaseSetSpy = jest.fn().mockRejectedValue('big error');
 
-        const {getByRole, getByText, queryByText} = render(<Admin/>);
+        const {getByRole, queryByText} = render(<Admin/>);
 
         const form = getByRole('form', {
           name: 'upload-event-form'
@@ -159,112 +219,113 @@ describe('Integration : Admin', () => {
             state: givenEventState.fullName,
             phone: givenContactPhone,
             email: givenContactEmail,
-            image: 'hello.png',
+            image: givenEventImageName,
             memo: givenEventMemo
           });
         });
 
         expect(queryByText('Event failed to be added.')).toBeInTheDocument();
+
       });
     });
 
-    describe('Sign Up', () => {
+    describe('when sign up is successful', () => {
       let authSpy;
 
-      describe('when sign up is successful', () => {
-        beforeEach(() => {
-          authSpy = jest.spyOn(firebase.auth(), 'createUserWithEmailAndPassword').mockResolvedValue({
-            user: {
-              uid: chance.guid()
-            }
-          });
-        });
-
-        afterEach(() => {
-          firebase.auth().createUserWithEmailAndPassword.mockClear();
-        });
-
-        it('should sign up new user successfully', async () => {
-          const {getByRole, queryByText} = render(<Admin/>);
-
-          expect(queryByText('User created successfully')).toBeNull();
-
-          const givenEmail = chance.email();
-          const givenPassword = chance.string();
-          const givenName = chance.name();
-
-          const form = getByRole('form', {
-            name: 'sign-up-form'
-          });
-          const {getByLabelText} = within(form);
-
-          const nameInput = getByLabelText('Name');
-          const emailInput = getByLabelText('Email');
-          const password = getByLabelText('Password');
-          const signUpButton = getByRole('button', {
-            name: 'Sign Up'
-          });
-
-          userEvent.type(nameInput, givenName);
-          userEvent.type(emailInput, givenEmail);
-          userEvent.type(password, givenPassword);
-          userEvent.click(signUpButton);
-
-          await waitFor(() => {
-            expect(authSpy).toHaveBeenCalledTimes(1);
-            expect(authSpy).toHaveBeenLastCalledWith({
-              username: givenEmail,
-              password: givenPassword,
-            });
-          });
-
-          expect(queryByText('User created successfully')).toBeInTheDocument();
+      beforeEach(() => {
+        authSpy = jest.spyOn(firebase.auth(), 'createUserWithEmailAndPassword').mockResolvedValue({
+          user: {
+            uid: chance.guid()
+          }
         });
       });
 
-      describe('when sign up is not successful', () => {
-        beforeEach(() => {
-          authSpy = jest.spyOn(firebase.auth(), 'createUserWithEmailAndPassword').mockRejectedValue({
-            message: 'Error Signing In',
-            statusCode: 500
+      afterEach(() => {
+        firebase.auth().createUserWithEmailAndPassword.mockClear();
+      });
+
+      it('should sign up new user successfully', async () => {
+        const {getByRole, queryByText} = render(<Admin/>);
+
+        expect(queryByText('User created successfully')).toBeNull();
+
+        const givenEmail = chance.email();
+        const givenPassword = chance.word();
+        const givenName = chance.name();
+
+        const form = getByRole('form', {
+          name: 'sign-up-form'
+        });
+        const {getByLabelText} = within(form);
+
+        const nameInput = getByLabelText('Name');
+        const emailInput = getByLabelText('Email');
+        const password = getByLabelText('Password');
+        const signUpButton = getByRole('button', {
+          name: 'Sign Up'
+        });
+
+        userEvent.type(nameInput, givenName);
+        userEvent.type(emailInput, givenEmail);
+        userEvent.type(password, givenPassword);
+        userEvent.click(signUpButton);
+
+        await waitFor(() => {
+          expect(authSpy).toHaveBeenCalledTimes(1);
+          expect(authSpy).toHaveBeenLastCalledWith({
+            username: givenEmail,
+            password: givenPassword,
           });
         });
 
-        afterEach(() => {
-          firebase.auth().createUserWithEmailAndPassword.mockClear();
+        expect(queryByText('User created successfully')).toBeInTheDocument();
+      });
+    });
+
+    describe('when sign up is not successful', () => {
+      let authSpy;
+
+      beforeEach(() => {
+        authSpy = jest.spyOn(firebase.auth(), 'createUserWithEmailAndPassword').mockRejectedValue({
+          message: 'Error Signing In',
+          statusCode: 500
+        });
+      });
+
+      afterEach(() => {
+        firebase.auth().createUserWithEmailAndPassword.mockClear();
+      });
+
+      it('should not sign up the new user', async () => {
+        const {getByRole, queryByText, getByLabelText} = render(<Admin/>);
+
+        expect(queryByText('Failed to create user')).toBeNull();
+
+        const givenEmail = 'ben@ben.com';
+        const givenPassword = chance.word();
+        const givenName = chance.name();
+
+        const nameInput = getByLabelText('Name');
+        const emailInput = getByLabelText('Email');
+        const password = getByLabelText('Password');
+        const signUpButton = getByRole('button', {
+          name: 'Sign Up'
         });
 
-        it('should not sign up the new user', async () => {
-          const {getByRole, queryByText, getByLabelText} = render(<Admin/>);
+        userEvent.type(nameInput, givenName);
+        userEvent.type(emailInput, givenEmail);
+        userEvent.type(password, givenPassword);
+        userEvent.click(signUpButton);
 
-          expect(queryByText('Failed to create user')).toBeNull();
-
-          const givenEmail = 'ben@ben.com';
-          const givenPassword = chance.string();
-          const givenName = chance.name();
-
-          const nameInput = getByLabelText('Name');
-          const emailInput = getByLabelText('Email');
-          const password = getByLabelText('Password');
-          const signUpButton = getByRole('button', {
-            name: 'Sign Up'
+        await waitFor(() => {
+          expect(authSpy).toHaveBeenCalledTimes(1);
+          expect(authSpy).toHaveBeenLastCalledWith({
+            username: givenEmail,
+            password: givenPassword,
           });
-
-          userEvent.type(nameInput, givenName);
-          userEvent.type(emailInput, givenEmail);
-          userEvent.type(password, givenPassword);
-          userEvent.click(signUpButton);
-
-          await waitFor(() => {
-            expect(authSpy).toHaveBeenCalledTimes(1);
-            expect(authSpy).toHaveBeenLastCalledWith({
-              username: givenEmail,
-              password: givenPassword,
-            });
-          });
-
-          expect(queryByText('Failed to create user')).toBeInTheDocument();
         });
+
+        expect(queryByText('Failed to create user')).toBeInTheDocument();
       });
     });
   });
@@ -285,7 +346,8 @@ describe('Integration : Admin', () => {
       useRouter.mockImplementationOnce(() => ({
         push: mockPushMethod,
       }));
-      const {getByTestId} = render(<Admin/>);
+
+      render(<Admin/>);
 
       expect(onAuthStateChangedSpy).toHaveBeenCalledTimes(1);
       expect(mockPushMethod).toHaveBeenCalledTimes(1);
