@@ -6,6 +6,7 @@ import Header from '../components/header';
 import Footer from '../components/footer';
 import UploadForm from '../components/upload-form';
 import SignUp from '../components/sign-up';
+import SignOut from '../components/sign-out';
 
 export default function Admin() {
   const [isAuthenticated, updatedAuthenticatedState] = useState(false);
@@ -33,8 +34,9 @@ export default function Admin() {
         <h1>Ricks List Admin</h1>
         {isAuthenticated ?
           <section>
-            <UploadForm/>
+            <UploadForm />
             <SignUp />
+            <SignOut />
           </section>
           : undefined // TODO: replace with loader
         }

@@ -9,10 +9,8 @@ import Chance from 'chance';
 const chance = new Chance();
 
 describe('Integration : Admin', () => {
-  let onAuthStateChangedSpy;
-
   describe('when authenticated', () => {
-    let databaseSetSpy, storageUploadSpy, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventImageName, givenEventImage, givenEventMemo;
+    let databaseSetSpy, storageUploadSpy, signOutSpy, routerPushMock, nextRouterSpy, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventImageName, givenEventImage, givenEventMemo;
 
     beforeEach(() => {
       givenEventDate = `${chance.date()}`;
@@ -27,7 +25,7 @@ describe('Integration : Admin', () => {
       givenEventImage = new File(['hello'], givenEventImageName, {type: 'image/png'});
       givenEventMemo = chance.word();
 
-      onAuthStateChangedSpy = jest.spyOn(firebase.auth(), 'onAuthStateChanged')
+      jest.spyOn(firebase.auth(), 'onAuthStateChanged')
         .mockImplementation(jest.fn((callback) => callback(
           {
             uid: chance.guid()
@@ -45,12 +43,60 @@ describe('Integration : Admin', () => {
         ref: jest.fn().mockReturnThis(),
         set: databaseSetSpy
       }));
+
+
+      signOutSpy = jest.spyOn(firebase.auth(), 'signOut');
+
+      routerPushMock = jest.fn();
+      nextRouterSpy = jest.spyOn(NextRouter, 'useRouter').mockImplementation(() => ({
+        push: routerPushMock,
+        prefetch: jest.fn().mockResolvedValue('prefetch resolve'),
+      }));
     });
 
     afterEach(() => {
       firebase.auth().onAuthStateChanged.mockClear();
       firebase.database.mockClear();
       firebase.storage.mockClear();
+      signOutSpy.mockClear();
+      nextRouterSpy.mockClear();
+    });
+
+    describe('when sign out is successful', () => {
+      it('should sign the user out and redirect to the homepage', async () => {
+        signOutSpy.mockResolvedValue('success');
+
+        const {getByRole} = render(<Admin/>);
+        const signOutButton = getByRole('button', {
+          name: 'Sign Out'
+        });
+
+        userEvent.click(signOutButton);
+
+        await waitFor(() => {
+          expect(signOutSpy).toHaveBeenCalledTimes(1);
+          expect(routerPushMock).toHaveBeenCalledTimes(1);
+          expect(routerPushMock).toHaveBeenCalledWith('/');
+        });
+      });
+    });
+
+    describe('when sign out is not successful', () => {
+      it('should not redirect the user to the homepage', async () => {
+        signOutSpy.mockRejectedValue('error');
+
+        const {getByRole} = render(<Admin/>);
+        const signOutButton = getByRole('button', {
+          name: 'Sign Out'
+        });
+
+        userEvent.click(signOutButton);
+
+        await waitFor(() => {
+          expect(signOutSpy).toHaveBeenCalledTimes(1);
+          expect(routerPushMock).toHaveBeenCalledTimes(0);
+        });
+      });
     });
 
     describe('when image upload is successful', () => {
@@ -225,7 +271,6 @@ describe('Integration : Admin', () => {
         });
 
         expect(queryByText('Event failed to be added.')).toBeInTheDocument();
-
       });
     });
 
@@ -332,7 +377,7 @@ describe('Integration : Admin', () => {
 
   describe('when not authenticated', () => {
     beforeEach(() => {
-      onAuthStateChangedSpy = jest.spyOn(firebase.auth(), 'onAuthStateChanged')
+      jest.spyOn(firebase.auth(), 'onAuthStateChanged')
         .mockImplementation(jest.fn((callback) => callback(null)));
     });
 
@@ -349,7 +394,6 @@ describe('Integration : Admin', () => {
 
       render(<Admin/>);
 
-      expect(onAuthStateChangedSpy).toHaveBeenCalledTimes(1);
       expect(mockPushMethod).toHaveBeenCalledTimes(1);
       expect(mockPushMethod).toHaveBeenCalledWith('/sign-in');
     });
