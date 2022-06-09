@@ -32,15 +32,17 @@ describe('Unit : Event List', () => {
           [chance.string()]: expectedEventList[0]
         };
         const snapshot = {val: () => expectedFirebaseResponse};
+        const databaseRefMock = jest.fn().mockReturnThis();
 
         jest.spyOn(firebase, 'database').mockImplementation(() => ({
-          ref: jest.fn().mockReturnThis(),
+          ref: databaseRefMock,
           on:  jest.fn((event, callback) => callback(snapshot))
         }));
 
         const result = await getServerSideProps(context);
 
         expect(firebase.database).toHaveBeenCalledTimes(1);
+        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${context.params.statename}`);
         expect(result).toEqual({
           props: {
             stateName: context.params.statename,
@@ -60,15 +62,17 @@ describe('Unit : Event List', () => {
         const expectedEventList = [];
         const expectedFirebaseResponse = {};
         const snapshot = {val: () => expectedFirebaseResponse};
+        const databaseRefMock = jest.fn().mockReturnThis();
 
         jest.spyOn(firebase, 'database').mockImplementation(() => ({
-          ref: jest.fn().mockReturnThis(),
+          ref: databaseRefMock,
           on:  jest.fn((event, callback) => callback(snapshot))
         }));
 
         const result = await getServerSideProps(context);
 
         expect(firebase.database).toHaveBeenCalledTimes(1);
+        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${context.params.statename}`);
         expect(result).toEqual({
           props: {
             stateName: context.params.statename,

@@ -7,7 +7,8 @@ import EventList from '../../components/event-list';
 export async function getServerSideProps(context) {
   const stateName = context.params.statename;
   const eventList = [];
-  const dbRef = firebase.database().ref(`/${stateName}`);
+  const currentYear = new Date().getFullYear();
+  const dbRef = firebase.database().ref(`${currentYear}/${stateName}`);
   const getEventData = (ref) => {
     return new Promise((resolve, reject) => {
       const onError = (error) => reject(error);
