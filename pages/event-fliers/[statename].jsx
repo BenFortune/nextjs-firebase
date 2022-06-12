@@ -6,13 +6,14 @@ import FlierList from '../../components/flier-list';
 
 export async function getServerSideProps({params}) {
   let flierList = [];
-  let eventList = [];
   let error = false;
+  const eventList = [];
   const stateName = params.statename;
   const storageRef = firebase.storage().ref();
+  const currentYear = new Date().getFullYear();
 
   try {
-    await firebase.database().ref(`/${stateName}`).on('value', (snapshot) => {
+    await firebase.database().ref(`${currentYear}/${stateName}`).on('value', (snapshot) => {
       const dataSnapshot = snapshot.val();
 
       Object.entries(dataSnapshot).forEach((entry) => {

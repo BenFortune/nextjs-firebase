@@ -10,7 +10,7 @@ const chance = new Chance();
 
 describe('Integration : Admin', () => {
   describe('when authenticated', () => {
-    let databaseSetSpy, storageUploadSpy, signOutSpy, routerPushMock, nextRouterSpy, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventImageName, givenEventImage, givenEventMemo;
+    let databaseSetSpy, storageUploadSpy, signOutSpy, databaseRefMock, storageChildMock, routerPushMock, nextRouterSpy, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventImageName, givenEventImage, givenEventMemo;
 
     beforeEach(() => {
       givenEventDate = `${chance.date()}`;
@@ -24,6 +24,8 @@ describe('Integration : Admin', () => {
       givenEventImageName = `${chance.string()}.png`;
       givenEventImage = new File(['hello'], givenEventImageName, {type: 'image/png'});
       givenEventMemo = chance.word();
+      databaseRefMock = jest.fn().mockReturnThis();
+      storageChildMock = jest.fn().mockReturnThis();
 
       jest.spyOn(firebase.auth(), 'onAuthStateChanged')
         .mockImplementation(jest.fn((callback) => callback(
@@ -35,13 +37,13 @@ describe('Integration : Admin', () => {
       jest.spyOn(firebase, 'storage')
         .mockImplementation(() => ({
           ref: jest.fn().mockReturnThis(),
-          child: jest.fn().mockReturnThis(),
+          child: storageChildMock,
           put: storageUploadSpy
         }));
 
       jest.spyOn(firebase, 'database').mockImplementation(() => ({
-        ref: jest.fn().mockReturnThis(),
-        set: databaseSetSpy
+        ref: databaseRefMock,
+        push: databaseSetSpy
       }));
 
 
@@ -145,6 +147,8 @@ describe('Integration : Admin', () => {
         await waitFor(() => {
           expect(storageUploadSpy).toHaveBeenCalledTimes(1);
           expect(storageUploadSpy).toHaveBeenCalledWith(givenEventImage);
+          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.abbreviation}/${givenEventImage.name}`);
+          expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}`);
           expect(databaseSetSpy).toHaveBeenCalledTimes(1);
           expect(databaseSetSpy).toHaveBeenCalledWith({
             date: givenEventDate,
@@ -206,6 +210,7 @@ describe('Integration : Admin', () => {
         await waitFor(() => {
           expect(storageUploadSpy).toHaveBeenCalledTimes(1);
           expect(storageUploadSpy).toHaveBeenCalledWith(givenEventImage);
+          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.abbreviation}/${givenEventImage.name}`);
           expect(databaseSetSpy).toHaveBeenCalledTimes(0);
         });
       });
@@ -256,6 +261,7 @@ describe('Integration : Admin', () => {
 
         await waitFor(() => {
           expect(databaseSetSpy).toHaveBeenCalledTimes(1);
+          expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}`);
           expect(databaseSetSpy).toHaveBeenCalledWith({
             date: givenEventDate,
             name: givenEventName,

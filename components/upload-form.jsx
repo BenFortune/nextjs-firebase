@@ -15,11 +15,12 @@ export default function UploadForm() {
     event.preventDefault();
 
     const {date, name, time, address, city, state, phone, email, memo} = event.target.elements;
-    const eventStateName = stateNameToAbbreviation[state.value];
-    const imageResponse = await uploadImage(imageFileObj);
+    const currentYear = new Date().getFullYear();
+    const stateAbbreviation = stateNameToAbbreviation[state.value];
+    const imageResponse = await uploadImage(currentYear, stateAbbreviation, imageFileObj);
 
     if (imageResponse !== 'error') {
-      firebase.database().ref(`/${eventStateName}`).set({
+      firebase.database().ref(`${currentYear}/${state.value}`).push({
         date: date.value,
         name: name.value,
         time: time.value,
@@ -44,8 +45,8 @@ export default function UploadForm() {
     }
   }
 
-  function uploadImage(imageFile) {
-    const childRef = firebase.storage().ref().child(imageFile.name);
+  function uploadImage(year, stateAbbreviation, imageFile) {
+    const childRef = firebase.storage().ref().child(`${year}/${stateAbbreviation}/${imageFile.name}`);
     return childRef.put(imageFile).then((snapshot) => {
       return `${snapshot.ref.fullPath}`;
     }).catch(() => {
