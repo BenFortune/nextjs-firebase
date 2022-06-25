@@ -60,7 +60,7 @@ export default function UploadForm() {
         {alertType === 'success'
           ? <div>Event added successfully.</div>
           : <div>Event failed to be added.</div>
-        });
+        }
       </>
     );
   }

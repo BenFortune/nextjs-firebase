@@ -1,6 +1,6 @@
 import {render, within} from '@testing-library/react';
 import Chance from 'chance';
-import EventFliersByState from '../../../pages/event-fliers/[statename]';
+import EventFliersByState from '../../../../pages/event-fliers/[statename]/[month]';
 
 const chance = new Chance();
 function buildFlierList() {

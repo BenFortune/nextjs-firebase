@@ -31,7 +31,12 @@ export async function getServerSideProps(context) {
       // Error handle here
     });
 
-  return { props: { stateName, eventList } };
+  return {
+    props: {
+      stateName,
+      eventList
+    }
+  };
 }
 
 export default function EventLists({stateName, eventList, showErrorMessage}) {

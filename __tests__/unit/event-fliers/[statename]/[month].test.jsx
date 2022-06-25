@@ -1,7 +1,7 @@
 import {render, screen, within} from '@testing-library/react';
-import EventFliersByState, {getServerSideProps} from '../../../pages/event-fliers/[statename]';
+import EventFliersByState, {getServerSideProps} from '../../../../pages/event-fliers/[statename]/[month]';
 import Chance from 'chance';
-import {firebase} from '../../../firebase';
+import {firebase} from '../../../../firebase';
 
 const chance = new Chance();
 
@@ -66,8 +66,7 @@ describe('Unit : Event Fliers By State' , () => {
               'state': expectedEventList[0].state
             }],
             showErrorMessage: false
-          },
-          revalidate: 10
+          }
         });
       });
     });
@@ -117,8 +116,7 @@ describe('Unit : Event Fliers By State' , () => {
             stateName: givenContext.params.statename,
             flierList: expectedEventList,
             showErrorMessage: false
-          },
-          revalidate: 10
+          }
         });
       });
     });
@@ -164,8 +162,7 @@ describe('Unit : Event Fliers By State' , () => {
             stateName: givenContext.params.statename,
             flierList: [],
             showErrorMessage: true
-          },
-          revalidate: 10
+          }
         });
       });
     });

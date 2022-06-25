@@ -1,10 +1,11 @@
 import Head from 'next/head';
-import {firebase} from '../../firebase';
-import Header from '../../components/header';
-import Footer from '../../components/footer';
-import FlierList from '../../components/flier-list';
+import {firebase} from '../../../firebase';
+import Header from '../../../components/header';
+import Footer from '../../../components/footer';
+import FlierList from '../../../components/flier-list';
 
 export async function getServerSideProps({params}) {
+  console.log('Ben - params', params);
   let flierList = [];
   let error = false;
   const eventList = [];
@@ -50,7 +51,7 @@ export default function EventFliersByState({stateName, flierList, showErrorMessa
       <Head>
         <title>Rick&#39;s List Event Fliers</title>
         <meta name="description" content={`Rick's List ${stateName} car shows & car related event fliers`} />
-        <link rel="icon" href="/favicon.ico"/>
+        <link rel="icon" href="/public/favicon.ico"/>
       </Head>
       <Header />
       <main>
