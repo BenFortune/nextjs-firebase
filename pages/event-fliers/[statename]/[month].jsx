@@ -40,8 +40,7 @@ export async function getServerSideProps({params}) {
       stateName,
       flierList,
       showErrorMessage: error
-    },
-    revalidate: 10
+    }
   };
 }
 
