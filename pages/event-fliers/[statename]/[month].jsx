@@ -5,7 +5,6 @@ import Footer from '../../../components/footer';
 import FlierList from '../../../components/flier-list';
 
 export async function getServerSideProps({params}) {
-  console.log('Ben - params', params);
   let flierList = [];
   let error = false;
   const eventList = [];

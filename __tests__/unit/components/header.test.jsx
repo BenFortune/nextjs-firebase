@@ -18,7 +18,7 @@ describe('Unit : Header', () => {
 
     expect(ricksListLogo).toBeInTheDocument();
     expect(ricksListLogo).toHaveAttribute('alt', 'Rick\'s List Header Logo');
-    expect(ricksListLogo).toHaveAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+    expect(ricksListLogo).toHaveAttribute('src', '/_next/image?url=%2FRicksListLogo.png&w=3840&q=75');
   });
 
   it('should render the navigation', () => {

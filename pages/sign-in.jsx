@@ -16,12 +16,8 @@ export default function SignIn() {
       .then(async () => {
 
         const userCredential = await firebase.auth().signInWithEmailAndPassword(email.value, password.value);
-
-        console.log('Ben success signing in', userCredential.user);
       })
       .catch((error) => {
-        // Handle Errors here.
-        console.log('Ben - auth set persistence error', error);
         let errorCode = error.code;
         let errorMessage = error.message;
 

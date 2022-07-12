@@ -6,7 +6,7 @@ import {analytics} from '../firebase';
 import { useRouter } from 'next/router';
 
 function MyApp({ Component, pageProps }) {
-  const routers = useRouter();
+  const router = useRouter();
 
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') {
@@ -15,16 +15,16 @@ function MyApp({ Component, pageProps }) {
         analytics().logEvent('screen_view');
       };
 
-      routers.events.on('routeChangeComplete', logEvent);
+      router.events.on('routeChangeComplete', logEvent);
       //For First Page
       logEvent(window.location.pathname);
 
       //Remvove Event Listener after un-mount
       return () => {
-        routers.events.off('routeChangeComplete', logEvent);
+        router.events.off('routeChangeComplete', logEvent);
       };
     }
-  }, []);
+  }, [router]);
 
   return <Component {...pageProps} />;
 }
