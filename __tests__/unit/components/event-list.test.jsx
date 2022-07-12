@@ -3,29 +3,32 @@ import EventList from '../../../components/event-list';
 import Chance from 'chance';
 
 const chance = new Chance();
-function buildEventList() {
-  return {
-    date: chance.date({string: true}),
+function buildEventList(numberOfEvents) {
+  return [{
     month: chance.month(),
-    name: chance.string(),
-    time: chance.string(),
-    address: chance.string(),
-    city: chance.string(),
-    state: chance.string(),
-    contact: chance.phone(),
-    memo: chance.string(),
-    imageSrc: chance.string()
-  };
+    list: chance.n(() => ({
+      date: chance.date({string: true}),
+      name: chance.string(),
+      time: chance.string(),
+      address: chance.string(),
+      city: chance.string(),
+      state: chance.string(),
+      contact: chance.phone(),
+      memo: chance.string(),
+      imageSrc: chance.string()
+    }), numberOfEvents)
+  }];
 }
 
 describe('Unit : Event List', () => {
-  let givenProps;
+  let givenProps, expectedNumberOfEvents;
 
   describe('when event list is populated', () => {
     beforeEach(() => {
+      expectedNumberOfEvents = chance.d6();
       givenProps = {
         stateName: chance.string(),
-        eventList: chance.n(buildEventList, chance.d6())
+        eventList: buildEventList(expectedNumberOfEvents)
       };
     });
 
@@ -75,7 +78,7 @@ describe('Unit : Event List', () => {
       const {getAllByRole} = within(tableBody);
       const tableBodyRows = getAllByRole('row');
 
-      expect(tableBodyRows.length).toEqual(givenProps.eventList.length);
+      expect(tableBodyRows.length).toEqual(expectedNumberOfEvents + 1);
     });
   });
 

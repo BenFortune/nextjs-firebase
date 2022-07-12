@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function EventList({eventList}) {
   return(
     <>
@@ -16,17 +18,29 @@ export default function EventList({eventList}) {
             </tr>
           </thead>
           <tbody aria-label="event-list-table-body" key="event-list-table-body">
-            {eventList.map((event) => (
-              <tr key={event.name}>
-                <td>{event.date}</td>
-                <td>{event.name}</td>
-                <td>{event.time}</td>
-                <td>{event.address}</td>
-                <td>{event.city}</td>
-                <td>{event.state}</td>
-                <td>{event.contact}</td>
-                <td>{event.memo}</td>
-              </tr>
+            {eventList.map((item, index) => (
+              <React.Fragment key={index}>
+                <tr key={item.month}>
+                  <td>{item.month}</td>
+                </tr>
+                {item.list ?
+                  item.list.map((event) => (
+                    <tr key={event.name}>
+                      <td>{event.date}</td>
+                      <td>{event.name}</td>
+                      <td>{event.time}</td>
+                      <td>{event.address}</td>
+                      <td>{event.city}</td>
+                      <td>{event.state}</td>
+                      <td>{event.contact}</td>
+                      <td>{event.memo}</td>
+                    </tr>
+                  ))
+                  : <tr>
+                    <td></td>
+                  </tr>
+                }
+              </React.Fragment>
             ))}
           </tbody>
         </table>
