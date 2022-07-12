@@ -5,15 +5,16 @@ import * as NextRouter from 'next/router';
 import Admin from '../../pages/admin';
 import {stateNameList} from '../../constants/state-names';
 import Chance from 'chance';
+import {monthsMap} from '../../constants/months-map';
 
 const chance = new Chance();
 
 describe('Integration : Admin', () => {
   describe('when authenticated', () => {
-    let databaseSetSpy, storageUploadSpy, signOutSpy, databaseRefMock, storageChildMock, routerPushMock, nextRouterSpy, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventImageName, givenEventImage, givenEventMemo;
+    let databaseSetSpy, storageUploadSpy, signOutSpy, databaseRefMock, storageChildMock, routerPushMock, nextRouterSpy, expectedMonth, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventImageName, givenEventImage, givenEventMemo;
 
     beforeEach(() => {
-      givenEventDate = `${chance.date()}`;
+      givenEventDate = chance.date({string: true});
       givenEventName = chance.word();
       givenEventTime = chance.word();
       givenEventAddress = chance.address();
@@ -26,6 +27,15 @@ describe('Integration : Admin', () => {
       givenEventMemo = chance.word();
       databaseRefMock = jest.fn().mockReturnThis();
       storageChildMock = jest.fn().mockReturnThis();
+
+      const dateParts = givenEventDate.split('/');
+      if (dateParts[0].length === 1) {
+        const updatedMonth = `0${dateParts[0]}`;
+
+        givenEventDate = `${updatedMonth}/${dateParts[1]}/${dateParts[2]}`;
+      }
+
+      expectedMonth = monthsMap[givenEventDate.split('/')[0]];
 
       jest.spyOn(firebase.auth(), 'onAuthStateChanged')
         .mockImplementation(jest.fn((callback) => callback(
@@ -147,8 +157,8 @@ describe('Integration : Admin', () => {
         await waitFor(() => {
           expect(storageUploadSpy).toHaveBeenCalledTimes(1);
           expect(storageUploadSpy).toHaveBeenCalledWith(givenEventImage);
-          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.abbreviation}/${givenEventImage.name}`);
-          expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}`);
+          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.abbreviation}/${expectedMonth}/${givenEventImage.name}`);
+          expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}`);
           expect(databaseSetSpy).toHaveBeenCalledTimes(1);
           expect(databaseSetSpy).toHaveBeenCalledWith({
             date: givenEventDate,
@@ -210,7 +220,7 @@ describe('Integration : Admin', () => {
         await waitFor(() => {
           expect(storageUploadSpy).toHaveBeenCalledTimes(1);
           expect(storageUploadSpy).toHaveBeenCalledWith(givenEventImage);
-          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.abbreviation}/${givenEventImage.name}`);
+          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.abbreviation}/${expectedMonth}/${givenEventImage.name}`);
           expect(databaseSetSpy).toHaveBeenCalledTimes(0);
         });
       });
@@ -261,7 +271,7 @@ describe('Integration : Admin', () => {
 
         await waitFor(() => {
           expect(databaseSetSpy).toHaveBeenCalledTimes(1);
-          expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}`);
+          expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}`);
           expect(databaseSetSpy).toHaveBeenCalledWith({
             date: givenEventDate,
             name: givenEventName,

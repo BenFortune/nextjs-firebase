@@ -20,7 +20,7 @@ export default function Admin() {
         updatedAuthenticatedState(true);
       }
     });
-  }, []);
+  }, [router]);
 
   return(
     <>
