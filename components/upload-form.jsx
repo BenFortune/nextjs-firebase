@@ -2,6 +2,7 @@ import {useState} from 'react';
 import {firebase} from '../firebase';
 import {stateNameToAbbreviation} from '../constants/state-names';
 import StatenameSelect from './statename-select';
+import {monthsMap} from '../constants/months-map';
 
 export default function UploadForm() {
   const [imageFileObj, setImageFileObj] = useState();
@@ -16,11 +17,13 @@ export default function UploadForm() {
 
     const {date, name, time, address, city, state, phone, email, memo} = event.target.elements;
     const currentYear = new Date().getFullYear();
+    const monthDigit = date.value.split('/')[0];
+    const monthName = monthsMap[monthDigit];
     const stateAbbreviation = stateNameToAbbreviation[state.value];
-    const imageResponse = await uploadImage(currentYear, stateAbbreviation, imageFileObj);
+    const imageResponse = await uploadImage(currentYear, monthName, stateAbbreviation, imageFileObj);
 
     if (imageResponse !== 'error') {
-      firebase.database().ref(`${currentYear}/${state.value}`).push({
+      firebase.database().ref(`${currentYear}/${state.value}/${monthName}`).push({
         date: date.value,
         name: name.value,
         time: time.value,
@@ -45,8 +48,8 @@ export default function UploadForm() {
     }
   }
 
-  function uploadImage(year, stateAbbreviation, imageFile) {
-    const childRef = firebase.storage().ref().child(`${year}/${stateAbbreviation}/${imageFile.name}`);
+  function uploadImage(year, month, stateAbbreviation, imageFile) {
+    const childRef = firebase.storage().ref().child(`${year}/${stateAbbreviation}/${month}/${imageFile.name}`);
     return childRef.put(imageFile).then((snapshot) => {
       return `${snapshot.ref.fullPath}`;
     }).catch(() => {
