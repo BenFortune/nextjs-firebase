@@ -22,7 +22,7 @@ describe('Integration : State Event List', () => {
   it('should render a header', () => {
     const givenProps = {
       stateName: chance.string(),
-      eventList: chance.n(buildEventList, chance.d6())
+      eventList: []
     };
 
     const {getByRole} = render(<EventLists {...givenProps}/>);
@@ -35,7 +35,7 @@ describe('Integration : State Event List', () => {
   it('should render a footer', () => {
     const givenProps = {
       stateName: chance.string(),
-      eventList: chance.n(buildEventList, chance.d6())
+      eventList: []
     };
 
     const {getByRole} = render(<EventLists {...givenProps}/>);
@@ -49,9 +49,23 @@ describe('Integration : State Event List', () => {
 
   describe('when eventList prop is populated', () => {
     it('should render an event list table', () => {
+      const expectedNumberOfEvents = chance.d6();
       const givenProps = {
         stateName: chance.string(),
-        eventList: chance.n(buildEventList, chance.d6()),
+        eventList: [{
+          month: chance.month(),
+          list: chance.n(() => ({
+            date: chance.date({string: true}),
+            name: chance.string(),
+            time: chance.string(),
+            address: chance.string(),
+            city: chance.string(),
+            state: chance.string(),
+            contact: chance.phone(),
+            memo: chance.string(),
+            imageSrc: chance.string()
+          }), expectedNumberOfEvents)
+        }],
         showErrorMessage: false
       };
 
@@ -71,19 +85,25 @@ describe('Integration : State Event List', () => {
       expect(eventListTable).toBeInTheDocument();
       expect(tableHeader).toBeInTheDocument();
       expect(tableHeaderCells.length).toEqual(8);
-      expect(tableBodyRows.length).toEqual(givenProps.eventList.length);
+      expect(tableBodyRows.length).toEqual(expectedNumberOfEvents + 1);
 
-      tableBodyRows.forEach((tableRow, index) => {
+      const monthNameRow = tableBodyRows[0];
+
+      expect(monthNameRow.textContent).toEqual(givenProps.eventList[0].month);
+
+      const eventRows = tableBodyRows.filter((tableRow, index) => index !== 0);
+
+      eventRows.forEach((tableRow, index) => {
         const {getAllByRole} = within(tableRow);
         const tableCells = getAllByRole('cell');
-        expect(tableCells[0].textContent).toEqual(givenProps.eventList[index].date);
-        expect(tableCells[1].textContent).toEqual(givenProps.eventList[index].name);
-        expect(tableCells[2].textContent).toEqual(givenProps.eventList[index].time);
-        expect(tableCells[3].textContent).toEqual(givenProps.eventList[index].address);
-        expect(tableCells[4].textContent).toEqual(givenProps.eventList[index].city);
-        expect(tableCells[5].textContent).toEqual(givenProps.eventList[index].state);
-        expect(tableCells[6].textContent).toEqual(givenProps.eventList[index].contact);
-        expect(tableCells[7].textContent).toEqual(givenProps.eventList[index].memo);
+        expect(tableCells[0].textContent).toEqual(givenProps.eventList[0].list[index].date);
+        expect(tableCells[1].textContent).toEqual(givenProps.eventList[0].list[index].name);
+        expect(tableCells[2].textContent).toEqual(givenProps.eventList[0].list[index].time);
+        expect(tableCells[3].textContent).toEqual(givenProps.eventList[0].list[index].address);
+        expect(tableCells[4].textContent).toEqual(givenProps.eventList[0].list[index].city);
+        expect(tableCells[5].textContent).toEqual(givenProps.eventList[0].list[index].state);
+        expect(tableCells[6].textContent).toEqual(givenProps.eventList[0].list[index].contact);
+        expect(tableCells[7].textContent).toEqual(givenProps.eventList[0].list[index].memo);
       });
     });
   });

@@ -3,10 +3,11 @@ import {firebase} from '../../firebase';
 import Header from '../../components/header';
 import Footer from '../../components/footer';
 import EventList from '../../components/event-list';
+import {monthsMap, monthFullName} from '../../constants/months-map';
 
 export async function getServerSideProps(context) {
   const stateName = context.params.statename;
-  const eventList = [];
+  let eventMappedList = [];
   const currentYear = new Date().getFullYear();
   const dbRef = firebase.database().ref(`${currentYear}/${stateName}`);
   const getEventData = (ref) => {
@@ -20,10 +21,26 @@ export async function getServerSideProps(context) {
 
   await getEventData(dbRef)
     .then((value) => {
+      const events = {};
+      const sortedEvents = {};
+      // console.log('Ben - value', value);
       Object.entries(value).forEach((entry) => {
-        const [key, value] = entry;
+        const [key, values] = entry;
+        const unsortedEvents = Object.values(values);
+        events[key] = unsortedEvents.sort((a, b) => a.date.split('/')[1] - b.date.split('/')[1]);
+      });
 
-        eventList.push(value);
+      monthFullName.forEach((month) => {
+        sortedEvents[month] = events[month];
+      });
+
+      eventMappedList = Object.entries(sortedEvents).map((event) => {
+        const [month, list] = event;
+
+        return {
+          month,
+          list: list ? list : null
+        };
       });
     })
     .catch((error) => {
@@ -34,7 +51,7 @@ export async function getServerSideProps(context) {
   return {
     props: {
       stateName,
-      eventList
+      eventList: eventMappedList
     }
   };
 }
