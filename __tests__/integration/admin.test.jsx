@@ -1,4 +1,4 @@
-import {render, waitFor, within} from '@testing-library/react';
+import {render, waitFor, within, act} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {firebase} from '../../firebase';
 import * as NextRouter from 'next/router';
@@ -329,15 +329,18 @@ describe('Integration : Admin', () => {
         userEvent.type(nameInput, givenName);
         userEvent.type(emailInput, givenEmail);
         userEvent.type(password, givenPassword);
-        userEvent.click(signUpButton);
 
-        await waitFor(() => {
-          expect(authSpy).toHaveBeenCalledTimes(1);
-          expect(authSpy).toHaveBeenLastCalledWith({
-            username: givenEmail,
-            password: givenPassword,
-          });
+        await act(() => {
+          userEvent.click(signUpButton);
         });
+
+        // await waitFor(() => {
+        expect(authSpy).toHaveBeenCalledTimes(1);
+        expect(authSpy).toHaveBeenLastCalledWith({
+          username: givenEmail,
+          password: givenPassword,
+        });
+        // });
 
         expect(queryByText('User created successfully')).toBeInTheDocument();
       });
@@ -376,14 +379,15 @@ describe('Integration : Admin', () => {
         userEvent.type(nameInput, givenName);
         userEvent.type(emailInput, givenEmail);
         userEvent.type(password, givenPassword);
-        userEvent.click(signUpButton);
 
-        await waitFor(() => {
-          expect(authSpy).toHaveBeenCalledTimes(1);
-          expect(authSpy).toHaveBeenLastCalledWith({
-            username: givenEmail,
-            password: givenPassword,
-          });
+        await act(() => {
+          userEvent.click(signUpButton);
+        });
+
+        expect(authSpy).toHaveBeenCalledTimes(1);
+        expect(authSpy).toHaveBeenLastCalledWith({
+          username: givenEmail,
+          password: givenPassword,
         });
 
         expect(queryByText('Failed to create user')).toBeInTheDocument();

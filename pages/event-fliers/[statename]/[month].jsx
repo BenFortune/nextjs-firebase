@@ -3,31 +3,32 @@ import {firebase} from '../../../firebase';
 import Header from '../../../components/header';
 import Footer from '../../../components/footer';
 import FlierList from '../../../components/flier-list';
+import {stateNameToAbbreviation} from '../../../constants/state-names';
 
 export async function getServerSideProps({params}) {
   let flierList = [];
   let error = false;
-  const eventList = [];
+  let eventList = [];
   const stateName = params.statename;
+  const monthName = params.month;
   const storageRef = firebase.storage().ref();
   const currentYear = new Date().getFullYear();
 
   try {
-    await firebase.database().ref(`${currentYear}/${stateName}`).on('value', (snapshot) => {
+    await firebase.database().ref(`${currentYear}/${stateName}/${monthName}`).on('value', (snapshot) => {
       const dataSnapshot = snapshot.val();
 
-      Object.entries(dataSnapshot).forEach((entry) => {
-        const [key, value] = entry;
-
-        eventList.push(value);
-      });
+      eventList = Object.values(dataSnapshot);
     });
 
     flierList = await Promise.all(eventList.map(async (event) => {
-      if (!event.imageSrc) {
+      if (!event.image) {
         return event;
       }
-      event.imageSrc = await storageRef.child(event.imageSrc).getDownloadURL();
+
+      const stateAbbreviation = stateNameToAbbreviation[event.state];
+
+      event.imageSrc = await storageRef.child(`${currentYear}/${stateAbbreviation}/${monthName}/${event.image}`).getDownloadURL();
 
       return event;
     }));

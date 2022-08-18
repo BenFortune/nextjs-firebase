@@ -2,6 +2,8 @@ import {render, screen, within} from '@testing-library/react';
 import EventFliersByState, {getServerSideProps} from '../../../../pages/event-fliers/[statename]/[month]';
 import Chance from 'chance';
 import {firebase} from '../../../../firebase';
+import {stateNameList} from '../../../../constants/state-names';
+import {monthFullName} from '../../../../constants/months-map';
 
 const chance = new Chance();
 
@@ -16,7 +18,8 @@ describe('Unit : Event Fliers By State' , () => {
       it('should ', async () => {
         const givenContext = {
           params: {
-            statename: 'iowa'
+            statename: chance.pickone(stateNameList).fullName,
+            month: chance.pickone(monthFullName)
           }
         };
         const expectedFlierUrl = chance.url();
@@ -25,7 +28,7 @@ describe('Unit : Event Fliers By State' , () => {
           'city': chance.city(),
           'contact': chance.phone(),
           'date': chance.date(),
-          'imageSrc': 'IA/40-ford',
+          'image': 'IA/40-ford',
           'memo': chance.string(),
           'name': chance.string(),
           'state': chance.state()
@@ -50,7 +53,7 @@ describe('Unit : Event Fliers By State' , () => {
         const result = await getServerSideProps(givenContext);
 
         expect(firebase.database).toHaveBeenCalledTimes(1);
-        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenContext.params.statename}`);
+        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenContext.params.statename}/${givenContext.params.month}`);
         expect(firebase.storage).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           props: {
@@ -60,6 +63,7 @@ describe('Unit : Event Fliers By State' , () => {
               'city': expectedEventList[0].city,
               'contact': expectedEventList[0].contact,
               'date': expectedEventList[0].date,
+              'image': expectedEventList[0].image,
               'imageSrc': expectedFlierUrl,
               'memo': expectedEventList[0].memo,
               'name': expectedEventList[0].name,
@@ -75,7 +79,8 @@ describe('Unit : Event Fliers By State' , () => {
       it('should ', async () => {
         const givenContext = {
           params: {
-            statename: 'iowa'
+            statename: chance.pickone(stateNameList).fullName,
+            month: chance.pickone(monthFullName)
           }
         };
         const expectedFlierUrl = chance.url();
@@ -84,7 +89,7 @@ describe('Unit : Event Fliers By State' , () => {
           'city': chance.city(),
           'contact': chance.phone(),
           'date': chance.date(),
-          'imageSrc': undefined,
+          'image': undefined,
           'memo': chance.string(),
           'name': chance.string(),
           'state': chance.state()
@@ -109,7 +114,7 @@ describe('Unit : Event Fliers By State' , () => {
         const result = await getServerSideProps(givenContext);
 
         expect(firebase.database).toHaveBeenCalledTimes(1);
-        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenContext.params.statename}`);
+        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenContext.params.statename}/${givenContext.params.month}`);
         expect(firebase.storage).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           props: {
@@ -125,7 +130,8 @@ describe('Unit : Event Fliers By State' , () => {
       it('should ', async () => {
         const givenContext = {
           params: {
-            statename: 'iowa'
+            statename: chance.pickone(stateNameList).fullName,
+            month: chance.pickone(monthFullName)
           }
         };
         const expectedFlierUrl = chance.url();
@@ -134,7 +140,7 @@ describe('Unit : Event Fliers By State' , () => {
           'city': chance.city(),
           'contact': chance.phone(),
           'date': chance.date(),
-          'imageSrc': undefined,
+          'image': undefined,
           'memo': chance.string(),
           'name': chance.string(),
           'state': chance.state()
