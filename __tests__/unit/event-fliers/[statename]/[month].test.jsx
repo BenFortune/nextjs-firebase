@@ -15,7 +15,7 @@ describe('Unit : Event Fliers By State' , () => {
     });
 
     describe('when event query returns an event with an image source', () => {
-      it('should ', async () => {
+      it('should get the download url for the image', async () => {
         const givenContext = {
           params: {
             statename: chance.pickone(stateNameList).fullName,
@@ -76,7 +76,7 @@ describe('Unit : Event Fliers By State' , () => {
     });
 
     describe('when event query returns an event without an image source', () => {
-      it('should ', async () => {
+      it('should return the event list unmodified', async () => {
         const givenContext = {
           params: {
             statename: chance.pickone(stateNameList).fullName,
@@ -121,53 +121,6 @@ describe('Unit : Event Fliers By State' , () => {
             stateName: givenContext.params.statename,
             flierList: expectedEventList,
             showErrorMessage: false
-          }
-        });
-      });
-    });
-
-    describe('when event query returns an error', () => {
-      it('should ', async () => {
-        const givenContext = {
-          params: {
-            statename: chance.pickone(stateNameList).fullName,
-            month: chance.pickone(monthFullName)
-          }
-        };
-        const expectedFlierUrl = chance.url();
-        const expectedEventList = [{
-          'address': chance.string(),
-          'city': chance.city(),
-          'contact': chance.phone(),
-          'date': chance.date(),
-          'image': undefined,
-          'memo': chance.string(),
-          'name': chance.string(),
-          'state': chance.state()
-        }];
-        const expectedFirebaseResponse = {
-          [chance.string()]: expectedEventList[0]
-        };
-        const snapshot = {val: () => expectedFirebaseResponse};
-
-        jest.spyOn(firebase, 'database').mockImplementation(() => ({
-          ref: jest.fn().mockReturnThis(),
-          on:  jest.fn().mockRejectedValue('Bad Error')
-        }));
-
-        jest.spyOn(firebase, 'storage').mockImplementation(() => ({
-          ref: jest.fn().mockReturnThis(),
-          child: jest.fn().mockReturnThis(),
-          getDownloadURL: jest.fn().mockResolvedValue(expectedFlierUrl)
-        }));
-
-        const result = await getServerSideProps(givenContext);
-
-        expect(result).toEqual({
-          props: {
-            stateName: givenContext.params.statename,
-            flierList: [],
-            showErrorMessage: true
           }
         });
       });

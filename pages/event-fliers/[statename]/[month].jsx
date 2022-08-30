@@ -3,38 +3,42 @@ import {firebase} from '../../../firebase';
 import Header from '../../../components/header';
 import Footer from '../../../components/footer';
 import FlierList from '../../../components/flier-list';
-import {stateNameToAbbreviation} from '../../../constants/state-names';
+
+async function getFlierList(currentYear, stateName, monthName, eventList) {
+  const storageRef = firebase.storage().ref();
+
+  return await Promise.all(eventList.map(async (event) => {
+    if (!event.image) {
+      return event;
+    }
+
+    event.imageSrc = await storageRef.child(`${currentYear}/${stateName}/${monthName}/${event.image}`).getDownloadURL();
+
+    return event;
+  }));
+}
 
 export async function getServerSideProps({params}) {
   let flierList = [];
   let error = false;
-  let eventList = [];
+  const currentYear = new Date().getFullYear();
   const stateName = params.statename;
   const monthName = params.month;
-  const storageRef = firebase.storage().ref();
-  const currentYear = new Date().getFullYear();
+  const dbRef = firebase.database().ref(`${currentYear}/${stateName}/${monthName}`);
+  const getEventData = (dbRef) => {
+    return new Promise((resolve, reject) => {
+      const onError = (error) => reject(error);
+      const onSuccess = (snapshot) => resolve(snapshot.val());
 
-  try {
-    await firebase.database().ref(`${currentYear}/${stateName}/${monthName}`).on('value', (snapshot) => {
-      const dataSnapshot = snapshot.val();
-
-      eventList = Object.values(dataSnapshot);
+      dbRef.on('value', onSuccess, onError);
     });
+  };
 
-    flierList = await Promise.all(eventList.map(async (event) => {
-      if (!event.image) {
-        return event;
-      }
-
-      const stateAbbreviation = stateNameToAbbreviation[event.state];
-
-      event.imageSrc = await storageRef.child(`${currentYear}/${stateAbbreviation}/${monthName}/${event.image}`).getDownloadURL();
-
-      return event;
-    }));
-  } catch (e) {
-    error = true;
-  }
+  await getEventData(dbRef)
+    .then(async (value) => {
+      const eventList = Object.values(value);
+      flierList = await getFlierList(currentYear, stateName, monthName, eventList);
+    });
 
   return {
     props: {
