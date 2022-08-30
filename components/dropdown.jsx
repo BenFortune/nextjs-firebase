@@ -4,9 +4,7 @@ import styles from '../styles/Dropdown.module.css';
 import cn from 'classnames';
 
 export default function Dropdown({stateName, isOpen}) {
-
   return (
-
     <ul className={cn(styles['rl-dropdown'], {
       [styles.open]: isOpen,
       [styles.closed]: !isOpen

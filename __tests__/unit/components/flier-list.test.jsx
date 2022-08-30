@@ -3,6 +3,7 @@ import FlierList from '../../../components/flier-list';
 import Chance from 'chance';
 
 const chance = new Chance();
+
 function buildFlierList() {
   return {
     [chance.string()]: chance.string(),

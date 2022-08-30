@@ -50,6 +50,7 @@ export default function UploadForm() {
 
   function uploadImage(year, month, stateAbbreviation, imageFile) {
     const childRef = firebase.storage().ref().child(`${year}/${stateAbbreviation}/${month}/${imageFile.name}`);
+
     return childRef.put(imageFile).then((snapshot) => {
       return `${snapshot.ref.fullPath}`;
     }).catch(() => {
