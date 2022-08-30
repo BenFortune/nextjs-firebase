@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "fixlint": "next lint --fix",
     "test": "jest --watch",
     "coverage": "jest --coverage"
   },
