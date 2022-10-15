@@ -6,12 +6,21 @@ import Admin from '../../pages/admin';
 import {stateNameList} from '../../constants/state-names';
 import Chance from 'chance';
 import {monthsMap} from '../../constants/months-map';
+import imageCompression from 'browser-image-compression';
+
+
+jest.mock('browser-image-compression', () => {
+  return jest.fn().mockResolvedValue({
+    name: 'super-compressed-image',
+    type: 'image/png'
+  });
+});
 
 const chance = new Chance();
 
 describe('Integration : Admin', () => {
   describe('when authenticated', () => {
-    let databaseSetSpy, storageUploadSpy, signOutSpy, databaseRefMock, storageChildMock, routerPushMock, nextRouterSpy, expectedMonth, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventImageName, givenEventImage, givenEventMemo;
+    let databaseSetSpy, storageUploadMock, signOutSpy, databaseRefMock, storageChildMock, routerPushMock, nextRouterSpy, expectedMonth, givenEventDate, givenEventName, givenEventTime, givenEventAddress, givenEventCity, givenEventState, givenContactPhone, givenContactEmail, givenEventMemo, givenEventImageName, givenEventImage;
 
     beforeEach(() => {
       givenEventDate = chance.date({string: true});
@@ -27,8 +36,10 @@ describe('Integration : Admin', () => {
       givenEventMemo = chance.word();
       databaseRefMock = jest.fn().mockReturnThis();
       storageChildMock = jest.fn().mockReturnThis();
+      storageUploadMock = jest.fn();
 
       const dateParts = givenEventDate.split('/');
+
       if (dateParts[0].length === 1) {
         const updatedMonth = `0${dateParts[0]}`;
 
@@ -48,7 +59,7 @@ describe('Integration : Admin', () => {
         .mockImplementation(() => ({
           ref: jest.fn().mockReturnThis(),
           child: storageChildMock,
-          put: storageUploadSpy
+          put: storageUploadMock
         }));
 
       jest.spyOn(firebase, 'database').mockImplementation(() => ({
@@ -72,6 +83,7 @@ describe('Integration : Admin', () => {
       firebase.storage.mockClear();
       signOutSpy.mockClear();
       nextRouterSpy.mockClear();
+      jest.clearAllMocks();
     });
 
     describe('when sign out is successful', () => {
@@ -113,9 +125,9 @@ describe('Integration : Admin', () => {
 
     describe('when image upload is successful', () => {
       it('should upload an event', async () => {
-        storageUploadSpy = jest.fn().mockResolvedValue({
+        storageUploadMock = jest.fn().mockResolvedValue({
           ref: {
-            fullPath: givenEventImageName
+            fullPath: 'super-compressed-image.png'
           }
         });
         databaseSetSpy = jest.fn().mockResolvedValue('yo');
@@ -155,9 +167,11 @@ describe('Integration : Admin', () => {
         userEvent.click(submitButton);
 
         await waitFor(() => {
-          expect(storageUploadSpy).toHaveBeenCalledTimes(1);
-          expect(storageUploadSpy).toHaveBeenCalledWith(givenEventImage);
-          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.abbreviation}/${expectedMonth}/${givenEventImage.name}`);
+          expect(imageCompression).toHaveBeenCalledTimes(1);
+          expect(imageCompression).toHaveBeenCalledWith(givenEventImage, {'initialQuality': 0.8, 'maxWidthOrHeight': 1500, 'useWebWorker': true});
+          expect(storageUploadMock).toHaveBeenCalledTimes(1);
+          expect(storageUploadMock).toHaveBeenCalledWith({'name': 'super-compressed-image', 'type': 'image/png'});
+          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}/super-compressed-image`);
           expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}`);
           expect(databaseSetSpy).toHaveBeenCalledTimes(1);
           expect(databaseSetSpy).toHaveBeenCalledWith({
@@ -180,8 +194,8 @@ describe('Integration : Admin', () => {
 
     describe('when image upload is not successful', () => {
       it('should not upload an event', async () => {
-        storageUploadSpy = jest.fn().mockRejectedValue('error ben');
-        databaseSetSpy = jest.fn().mockResolvedValue('yo do not call me');
+        storageUploadMock.mockRejectedValue('error ben');
+        databaseSetSpy = jest.fn();
 
         const {getByRole} = render(<Admin/>);
 
@@ -218,9 +232,11 @@ describe('Integration : Admin', () => {
         userEvent.click(submitButton);
 
         await waitFor(() => {
-          expect(storageUploadSpy).toHaveBeenCalledTimes(1);
-          expect(storageUploadSpy).toHaveBeenCalledWith(givenEventImage);
-          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.abbreviation}/${expectedMonth}/${givenEventImage.name}`);
+          expect(imageCompression).toHaveBeenCalledTimes(1);
+          expect(imageCompression).toHaveBeenCalledWith(givenEventImage, {'initialQuality': 0.8, 'maxWidthOrHeight': 1500, 'useWebWorker': true});
+          expect(storageUploadMock).toHaveBeenCalledTimes(1);
+          expect(storageUploadMock).toHaveBeenCalledWith({name: 'super-compressed-image', type: 'image/png'});
+          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}/super-compressed-image`);
           expect(databaseSetSpy).toHaveBeenCalledTimes(0);
         });
       });
@@ -228,7 +244,7 @@ describe('Integration : Admin', () => {
 
     describe('when database set is not successful', () => {
       it('should throw an error', async () => {
-        storageUploadSpy = jest.fn().mockResolvedValue({
+        storageUploadMock = jest.fn().mockResolvedValue({
           ref: {
             fullPath: givenEventImageName
           }
@@ -270,8 +286,8 @@ describe('Integration : Admin', () => {
         userEvent.click(submitButton);
 
         await waitFor(() => {
-          expect(databaseSetSpy).toHaveBeenCalledTimes(1);
           expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}`);
+          expect(databaseSetSpy).toHaveBeenCalledTimes(1);
           expect(databaseSetSpy).toHaveBeenCalledWith({
             date: givenEventDate,
             name: givenEventName,
@@ -284,9 +300,8 @@ describe('Integration : Admin', () => {
             image: givenEventImageName,
             memo: givenEventMemo
           });
+          expect(queryByText('Event failed to be added.')).toBeInTheDocument();
         });
-
-        expect(queryByText('Event failed to be added.')).toBeInTheDocument();
       });
     });
 

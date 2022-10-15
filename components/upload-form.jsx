@@ -1,8 +1,8 @@
 import {useState} from 'react';
 import {firebase} from '../firebase';
-import {stateNameToAbbreviation} from '../constants/state-names';
 import StatenameSelect from './statename-select';
 import {monthsMap} from '../constants/months-map';
+import imageCompression from 'browser-image-compression';
 
 export default function UploadForm() {
   const [imageFileObj, setImageFileObj] = useState();
@@ -19,32 +19,44 @@ export default function UploadForm() {
     const currentYear = new Date().getFullYear();
     const monthDigit = date.value.split('/')[0];
     const monthName = monthsMap[monthDigit];
-    const stateAbbreviation = stateNameToAbbreviation[state.value];
-    const imageResponse = await uploadImage(currentYear, monthName, stateAbbreviation, imageFileObj);
 
-    if (imageResponse !== 'error') {
-      firebase.database().ref(`${currentYear}/${state.value}/${monthName}`).push({
-        date: date.value,
-        name: name.value,
-        time: time.value,
-        address: address.value,
-        city: city.value,
-        state: state.value,
-        phone: phone.value,
-        email: email.value,
-        image: imageFileObj.name,
-        memo: memo.value
-      }).then(() => {
+    if (imageFileObj) {
+      try {
+        const imageCompressionResult = await imageCompression(imageFileObj, {
+          maxWidthOrHeight: 1500,
+          useWebWorker: true,
+          initialQuality: 0.8
+        });
+
+        await uploadImage(currentYear, monthName, state.value, imageCompressionResult);
+
+        await firebase.database().ref(`${currentYear}/${state.value}/${monthName}`).push({
+          date: date.value,
+          name: name.value,
+          time: time.value,
+          address: address.value,
+          city: city.value,
+          state: state.value,
+          phone: phone.value,
+          email: email.value,
+          image: imageFileObj.name,
+          memo: memo.value
+        });
+
         updateAlertMessage({
           display: true,
           alertType: 'success'
         });
-      }).catch(() => {
+
+
+      } catch (error) {
+        console.log('Image Error', error);
+
         updateAlertMessage({
           display: true,
           alertType: 'error'
         });
-      });
+      }
     }
   }
 
@@ -53,8 +65,8 @@ export default function UploadForm() {
 
     return childRef.put(imageFile).then((snapshot) => {
       return `${snapshot.ref.fullPath}`;
-    }).catch(() => {
-      return 'error';
+    }).catch((error) => {
+      throw new Error(`Error is ${error}`);
     });
   }
 

@@ -16,8 +16,9 @@
     "coverage": "jest --coverage"
   },
   "dependencies": {
+    "browser-image-compression": "^2.0.0",
     "classnames": "^2.3.1",
-    "firebase": "8.9.1",
+    "firebase": "^8.10.1",
     "next": "^12.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
