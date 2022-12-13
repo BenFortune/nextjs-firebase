@@ -3,6 +3,7 @@ import EventList from '../../../components/event-list';
 import Chance from 'chance';
 
 const chance = new Chance();
+
 function buildEventList(numberOfEvents) {
   return [{
     month: chance.month(),
