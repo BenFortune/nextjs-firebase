@@ -3,6 +3,7 @@ import {firebase} from '../../../firebase';
 import Header from '../../../components/header';
 import Footer from '../../../components/footer';
 import FlierList from '../../../components/flier-list';
+import {getEventData} from '../../../services/get-event-data';
 
 async function getFlierList(currentYear, stateName, monthName, eventList) {
   const storageRef = firebase.storage().ref();
@@ -25,14 +26,6 @@ export async function getServerSideProps({params}) {
   const stateName = params.statename;
   const monthName = params.month;
   const dbRef = firebase.database().ref(`${currentYear}/${stateName}/${monthName}`);
-  const getEventData = (dbRef) => {
-    return new Promise((resolve, reject) => {
-      const onError = (error) => reject(error);
-      const onSuccess = (snapshot) => resolve(snapshot.val());
-
-      dbRef.on('value', onSuccess, onError);
-    });
-  };
 
   await getEventData(dbRef)
     .then(async (value) => {

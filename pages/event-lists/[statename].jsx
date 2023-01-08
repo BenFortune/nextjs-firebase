@@ -3,21 +3,14 @@ import {firebase} from '../../firebase';
 import Header from '../../components/header';
 import Footer from '../../components/footer';
 import EventList from '../../components/event-list';
-import {monthsMap, monthFullName} from '../../constants/months-map';
+import {monthFullName} from '../../constants/months-map';
+import {getEventData} from '../../services/get-event-data';
 
 export async function getServerSideProps(context) {
   const stateName = context.params.statename;
   let eventMappedList = [];
   const currentYear = new Date().getFullYear();
   const dbRef = firebase.database().ref(`${currentYear}/${stateName}`);
-  const getEventData = (ref) => {
-    return new Promise((resolve, reject) => {
-      const onError = (error) => reject(error);
-      const onSuccess = (snapshot) => resolve(snapshot.val());
-
-      ref.on('value', onSuccess, onError);
-    });
-  };
 
   await getEventData(dbRef)
     .then((value) => {

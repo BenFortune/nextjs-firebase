@@ -53,7 +53,7 @@ describe('Unit : Event Fliers By State' , () => {
         const result = await getServerSideProps(givenContext);
 
         expect(firebase.database).toHaveBeenCalledTimes(1);
-        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenContext.params.statename}/${givenContext.params.month}`);
+        expect(databaseRefMock).toHaveBeenCalledWith(`2023/${givenContext.params.statename}/${givenContext.params.month}`);
         expect(firebase.storage).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           props: {
@@ -114,7 +114,7 @@ describe('Unit : Event Fliers By State' , () => {
         const result = await getServerSideProps(givenContext);
 
         expect(firebase.database).toHaveBeenCalledTimes(1);
-        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenContext.params.statename}/${givenContext.params.month}`);
+        expect(databaseRefMock).toHaveBeenCalledWith(`2023/${givenContext.params.statename}/${givenContext.params.month}`);
         expect(firebase.storage).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           props: {

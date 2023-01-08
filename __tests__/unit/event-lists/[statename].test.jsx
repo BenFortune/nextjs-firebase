@@ -82,7 +82,7 @@ describe('Unit : Event List', () => {
         const result = await getServerSideProps(context);
 
         expect(firebase.database).toHaveBeenCalledTimes(1);
-        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${context.params.statename}`);
+        expect(databaseRefMock).toHaveBeenCalledWith(`2023/${context.params.statename}`);
         expect(result).toEqual({
           props: {
             stateName: context.params.statename,
@@ -113,7 +113,7 @@ describe('Unit : Event List', () => {
         const result = await getServerSideProps(context);
 
         expect(firebase.database).toHaveBeenCalledTimes(1);
-        expect(databaseRefMock).toHaveBeenCalledWith(`2022/${context.params.statename}`);
+        expect(databaseRefMock).toHaveBeenCalledWith(`2023/${context.params.statename}`);
         expect(result).toEqual({
           props: {
             stateName: context.params.statename,

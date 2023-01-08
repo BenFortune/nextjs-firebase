@@ -3,6 +3,7 @@ import Chance from 'chance';
 import EventFliersByState from '../../../../pages/event-fliers/[statename]/[month]';
 
 const chance = new Chance();
+
 function buildFlierList() {
   return {
     [chance.string()]: chance.string(),
@@ -34,7 +35,6 @@ describe('Integration : Event Fliers By State', () => {
 
     const {getByRole} = render(<EventFliersByState {...givenProps}/>);
 
-    // TODO FIGURE OUT WHY FOOTER SEEMS TO BE RENDERED TWICE
     const footer = getByRole('contentinfo',{
       name: 'Ricks List Footer'
     });

@@ -3,6 +3,7 @@ import EventLists from '../../../pages/event-lists/[statename]';
 import Chance from 'chance';
 
 const chance = new Chance();
+
 function buildEventList() {
   return {
     date: chance.date({string: true}),

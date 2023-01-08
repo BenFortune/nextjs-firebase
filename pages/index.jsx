@@ -13,7 +13,7 @@ export default function Home() {
         <meta name="description" content="The top spot for cars shows in the heartland of America" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header/>
+      <Header />
       <main>
         <h1>Rick&#39;s List</h1>
         <p data-testid="header-subtext">The top spot for cars shows in the heartland of America</p>

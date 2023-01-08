@@ -171,8 +171,8 @@ describe('Integration : Admin', () => {
           expect(imageCompression).toHaveBeenCalledWith(givenEventImage, {'initialQuality': 0.8, 'maxWidthOrHeight': 1500, 'useWebWorker': true});
           expect(storageUploadMock).toHaveBeenCalledTimes(1);
           expect(storageUploadMock).toHaveBeenCalledWith({'name': 'super-compressed-image', 'type': 'image/png'});
-          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}/super-compressed-image`);
-          expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}`);
+          expect(storageChildMock).toHaveBeenCalledWith(`2023/${givenEventState.fullName}/${expectedMonth}/super-compressed-image`);
+          expect(databaseRefMock).toHaveBeenCalledWith(`2023/${givenEventState.fullName}/${expectedMonth}`);
           expect(databaseSetSpy).toHaveBeenCalledTimes(1);
           expect(databaseSetSpy).toHaveBeenCalledWith({
             date: givenEventDate,
@@ -236,7 +236,7 @@ describe('Integration : Admin', () => {
           expect(imageCompression).toHaveBeenCalledWith(givenEventImage, {'initialQuality': 0.8, 'maxWidthOrHeight': 1500, 'useWebWorker': true});
           expect(storageUploadMock).toHaveBeenCalledTimes(1);
           expect(storageUploadMock).toHaveBeenCalledWith({name: 'super-compressed-image', type: 'image/png'});
-          expect(storageChildMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}/super-compressed-image`);
+          expect(storageChildMock).toHaveBeenCalledWith(`2023/${givenEventState.fullName}/${expectedMonth}/super-compressed-image`);
           expect(databaseSetSpy).toHaveBeenCalledTimes(0);
         });
       });
@@ -286,7 +286,7 @@ describe('Integration : Admin', () => {
         userEvent.click(submitButton);
 
         await waitFor(() => {
-          expect(databaseRefMock).toHaveBeenCalledWith(`2022/${givenEventState.fullName}/${expectedMonth}`);
+          expect(databaseRefMock).toHaveBeenCalledWith(`2023/${givenEventState.fullName}/${expectedMonth}`);
           expect(databaseSetSpy).toHaveBeenCalledTimes(1);
           expect(databaseSetSpy).toHaveBeenCalledWith({
             date: givenEventDate,
