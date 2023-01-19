@@ -9,7 +9,8 @@ import {getEventData} from '../../services/get-event-data';
 export async function getServerSideProps(context) {
   const stateName = context.params.statename;
   let eventMappedList = [];
-  const currentYear = new Date().getFullYear();
+  // const currentYear = new Date().getFullYear();
+  const currentYear = 2022;
   const dbRef = firebase.database().ref(`${currentYear}/${stateName}`);
 
   await getEventData(dbRef)

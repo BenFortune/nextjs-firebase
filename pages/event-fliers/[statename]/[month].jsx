@@ -22,7 +22,8 @@ async function getFlierList(currentYear, stateName, monthName, eventList) {
 export async function getServerSideProps({params}) {
   let flierList = [];
   let error = false;
-  const currentYear = new Date().getFullYear();
+  // const currentYear = new Date().getFullYear();
+  const currentYear = 2022;
   const stateName = params.statename;
   const monthName = params.month;
   const dbRef = firebase.database().ref(`${currentYear}/${stateName}/${monthName}`);
@@ -31,6 +32,9 @@ export async function getServerSideProps({params}) {
     .then(async (value) => {
       const eventList = Object.values(value);
       flierList = await getFlierList(currentYear, stateName, monthName, eventList);
+    })
+    .catch(() => {
+      error = true;
     });
 
   return {
